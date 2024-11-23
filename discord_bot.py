@@ -8,7 +8,11 @@ class DiscordBot:
         # Store bot token and target channel ID
         self.token = token
         self.channel_id = channel_id
-        self.client = discord.Client(intents=discord.Intents.default())
+
+        intents = discord.Intents.default()
+        intents.message_content = True  # Enable message content intent
+
+        self.client = discord.Client(intents=intents)  # Pass intents to the client
         self.message_controller = None
 
         # Set up events
@@ -25,8 +29,9 @@ class DiscordBot:
         if isinstance(target_channel, discord.TextChannel):
             # Initialize the MessageController with the Discord client and target channel
             self.message_controller = MessageController(
-                discord_client=self.client, target_channel=target_channel
+                target_channel=target_channel
             )
+            self.message_controller.load_state()
             print("MessageController is ready")
         else:
             print(f"Could not find channel with ID {self.channel_id}")

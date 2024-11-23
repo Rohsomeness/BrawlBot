@@ -1,11 +1,13 @@
 """Translate message to actions"""
-from discord import Client, TextChannel
+import os
+import pickle
+from discord import TextChannel
 from brawl_client import BrawlClient
 
 
 class MessageController:
     """Process messages and perform actions"""
-    def __init__(self, discord_client: Client, target_channel: TextChannel):
+    def __init__(self, target_channel: TextChannel):
         self.message_char_len_limit = 100
         self.name = "brawlbot"
         self.available_commands = [
@@ -14,13 +16,13 @@ class MessageController:
         self.players_to_track: dict[str, dict] = {}
         self.player_map: dict[str, str] = {}
         self.brawl_client = BrawlClient()
-        self.discord_client = discord_client
         self.target_channel = target_channel
 
     async def send_message(self, msg: str) -> None:
         """Send message to Discord server"""
         if not self.target_channel:
             raise ValueError("Target channel is not set.")
+        print(msg)
         await self.target_channel.send(msg)
 
     async def _send_help_message(self) -> None:
@@ -76,7 +78,7 @@ class MessageController:
         - Players that are activated
         - Star players
         """
-        start_tracking_msg = "Tracking players:\n"
+        start_tracking_msg = "Started tracking players:\n"
         names = names_to_track.split(" ")
         for name in names:
             if name not in self.player_map:
@@ -84,41 +86,41 @@ class MessageController:
                 return
             player_info = self.brawl_client.get_player_info(self.player_map[name])
             self.players_to_track[name] = player_info
-            start_tracking_msg += "\tName: {name}, Start Trophies: {player_trophies}"
+            start_tracking_msg += f"\tName: {name}, Start Trophies: {player_info['trophies']}"
         await self.send_message(start_tracking_msg)
 
     async def _end_tracking(self):
         """End tracking of players"""
-        self.players_to_track = {}
         msg = "Ended Tracking\n"
         msg += "===== Trophy Gains =====\n"
-        for player, start_player_info in self.players_to_track:
+        for player, start_player_info in self.players_to_track.items():
             end_player_info = self.brawl_client.get_player_info(self.player_map[player])
             trophy_gain = end_player_info["trophies"] - start_player_info["trophies"]
-            msg += f"{player}: {trophy_gain}"
-            for brawler_num in len(end_player_info["brawlers"]):
+            msg += f"{player}: {trophy_gain}\n"
+            for brawler_num in range(len(end_player_info["brawlers"])):
                 start_trophies = start_player_info["brawlers"][brawler_num]["trophies"]
                 end_trophies = end_player_info["brawlers"][brawler_num]["trophies"]
                 if end_trophies != start_trophies:
                     brawler_name = end_player_info["brawlers"][brawler_num]["name"]
-                    msg += f"\t{brawler_name}: {end_trophies - start_trophies}"
+                    msg += f"\t{brawler_name}: {end_trophies - start_trophies}\n"
+        self.players_to_track = {}
         await self.send_message(msg)
 
     def _validate_message(self, msg: str) -> bool:
         """Some basic validation on messages before analyzing"""
-        if 1 > len(msg) > self.message_char_len_limit:
-            return False
-        if msg.split(" ", 1)[0] not in [self.name, "!setname", "!help", "!status", "!debug"]:
-            return False
-        if msg.split(" ", 2)[1] not in self.available_commands:
-            return False
-        return True
+        if 1 < len(msg) < self.message_char_len_limit:
+            return True
+        if msg.split(" ", 1)[0] in [self.name, "!setname", "!help", "!status", "!debug"]:
+            return True
+        if msg.split(" ", 2)[1] in self.available_commands:
+            return True
+        return False
 
     async def process_message(self, msg: str) -> None:  # noqa: C901 - allow complexity
         """Process the message and perform action"""
         if not self._validate_message(msg):
             return
-        main_command = msg.split(" ", 1)
+        main_command = msg.split(" ", 1)[0]
 
         # One word commands
         if main_command == "!debug":
@@ -129,8 +131,8 @@ class MessageController:
             await self._send_status_message()
 
         elif main_command == "!setname":
-            full_command = msg.split(" ", 2)
-            if len(full_command) != 3:
+            full_command = msg.split(" ", 1)
+            if len(full_command) != 2:
                 return
             await self._change_name(full_command[-1])
 
@@ -140,7 +142,8 @@ class MessageController:
                 if len(self.players_to_track) != 0:
                     await self.send_message("Already tracking games")
                     return
-                await self._start_tracking(action.split("start ")[-1])
+                else:
+                    await self._start_tracking(action.split("start ")[-1])
 
             elif "end" in action:
                 if len(self.players_to_track) == 0:
@@ -152,6 +155,31 @@ class MessageController:
                 name = action.split(" ", 2)[1]
                 tag = action.split(" ", 2)[-1]
                 await self._add_player(name, tag)
+        else:
+            return
+        self.save_state()
+
+    def save_state(self, filename="message_controller_state.pkl") -> None:
+        """Save the state of the controller to a file."""
+        with open(filename, "wb") as file:
+            pickle.dump({
+                "players_to_track": self.players_to_track,
+                "player_map": self.player_map,
+                "name": self.name,
+            }, file)
+        print(f"State saved to {filename}")
+
+    def load_state(self, filename="message_controller_state.pkl") -> None:
+        """Load the state of the controller from a file."""
+        if os.path.exists(filename):
+            with open(filename, "rb") as file:
+                state = pickle.load(file)
+                self.players_to_track = state.get("players_to_track", {})
+                self.player_map = state.get("player_map", {})
+                self.name = state.get("name", "brawlbot")
+            print(f"State loaded from {filename}")
+        else:
+            print(f"No saved state found at {filename}")
 
     def __str__(self) -> str:
         """Print all attributes of self"""
