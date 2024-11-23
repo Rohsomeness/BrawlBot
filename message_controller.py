@@ -1,4 +1,5 @@
 """Translate message to actions"""
+from brawl_client import BrawlClient
 
 
 class MessageController:
@@ -11,7 +12,7 @@ class MessageController:
         ]
         self.players_to_track: dict[str, dict] = {}
         self.player_map: dict[str, str] = {}
-        raise NotImplementedError
+        self.brawl_client = BrawlClient()
 
     def send_message(self, msg: str) -> None:
         """Send message to Discord server"""
@@ -57,7 +58,7 @@ class MessageController:
         self.send_message(registered_players_msg)
 
     def _add_player(self, player_name: str, player_tag: str):
-        if not self.brawl_client.get_player_info(player_tag):
+        if self.brawl_client.get_player_info(player_tag) is None:
             return self.send_message(f"Unable to find player tag {player_tag}")
         self.player_map[player_name] = player_tag
         self.send_message(f"Added player {player_name} with player tag {player_tag}")
