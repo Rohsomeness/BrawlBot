@@ -1,6 +1,7 @@
 import discord
 from message_controller import MessageController
 
+
 class DiscordBot:
     """Handle making discord bot"""
     def __init__(self, token: str, channel_id: int):
