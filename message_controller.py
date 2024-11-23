@@ -1,10 +1,11 @@
 """Translate message to actions"""
+from discord import Client, TextChannel
 from brawl_client import BrawlClient
 
 
 class MessageController:
     """Process messages and perform actions"""
-    def __init__(self):
+    def __init__(self, discord_client: Client, target_channel: TextChannel):
         self.message_char_len_limit = 100
         self.name = "brawlbot"
         self.available_commands = [
@@ -13,10 +14,14 @@ class MessageController:
         self.players_to_track: dict[str, dict] = {}
         self.player_map: dict[str, str] = {}
         self.brawl_client = BrawlClient()
+        self.discord_client = discord_client
+        self.target_channel = target_channel
 
-    def send_message(self, msg: str) -> None:
+    async def send_message(self, msg: str) -> None:
         """Send message to Discord server"""
-        raise NotImplementedError
+        if not self.target_channel:
+            raise ValueError("Target channel is not set.")
+        await self.target_channel.send(msg)
 
     def _send_help_message(self) -> None:
         """Send help message"""
