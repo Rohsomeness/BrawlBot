@@ -8,7 +8,7 @@ class BrawlClient:
 
     def get_player_info(self, player_tag: str):
         """Get player info from brawl api"""
-        player_tag = player_tag.replace("#", "%")
+        player_tag = player_tag.replace("#", "%23")
         response = requests.get(
             url=f"https://api.brawlstars.com/v1/players/{player_tag}",
             headers={

@@ -31,9 +31,13 @@ class MessageController:
             "!help": "print out all commands",
             "!setname <bot_name>": "set activation <bot_name> of bot",
             f"!{self.name} status": "show status of bot",
-            f"!{self.name} addplayer <player_name> <brawlstars_tag>": "add a player to track",
-            f"!{self.name} start": "start tracking all added players",
+            f"!{self.name} add <player_name> <brawlstars_tag>": "add a player to storage",
+            f"!{self.name} remove <player_name>": "remove a player from storage",
+            f"!{self.name} grind": "start tracking all added players",
+            f"!{self.name} start <player names separated by spaces>": "start tracking all added players",
+            f"!{self.name} progress": "show temporary progress of players",
             f"!{self.name} end": "end tracking and show stats",
+            f"!{self.name} reset": "empty all currently tracked players",
             "!debug": "show full status of bot",
         }
         help_msg = "List of available commands: \n"
@@ -86,8 +90,24 @@ class MessageController:
                 return
             player_info = self.brawl_client.get_player_info(self.player_map[name])
             self.players_to_track[name] = player_info
-            start_tracking_msg += f"\tName: {name}, Start Trophies: {player_info['trophies']}"
+            start_tracking_msg += f"\tName: {name}, Start Trophies: {player_info['trophies']}\n"
         await self.send_message(start_tracking_msg)
+
+    async def _show_progress(self):
+        """Show intermediate progresss"""
+        msg = "Progress\n"
+        msg += "===== Trophy Gains =====\n"
+        for player, start_player_info in self.players_to_track.items():
+            end_player_info = self.brawl_client.get_player_info(self.player_map[player])
+            trophy_gain = end_player_info["trophies"] - start_player_info["trophies"]
+            msg += f"{player}: {trophy_gain}\n"
+            for brawler_num in range(len(end_player_info["brawlers"])):
+                start_trophies = start_player_info["brawlers"][brawler_num]["trophies"]
+                end_trophies = end_player_info["brawlers"][brawler_num]["trophies"]
+                if end_trophies != start_trophies:
+                    brawler_name = end_player_info["brawlers"][brawler_num]["name"]
+                    msg += f"\t{brawler_name}: {end_trophies - start_trophies}\n"
+        await self.send_message(msg)
 
     async def _end_tracking(self):
         """End tracking of players"""
@@ -138,13 +158,27 @@ class MessageController:
 
         elif f"!{self.name}" in msg:
             action = msg.split(f"!{self.name} ")[-1]
-            if "start" in action:
+            if "reset" in action:
+                self.players_to_track = {}
+                await self.send_message("Cleared all tracked players")
+                return
+            elif "grind" in action:
+                if len(self.players_to_track) != 0:
+                    await self.send_message("Already tracking games")
+                    return
+                else:
+                    all_tracked_players = " ".join(self.player_map.keys())
+                    await self._start_tracking(all_tracked_players)
+                    return
+            elif "start" in action:
                 if len(self.players_to_track) != 0:
                     await self.send_message("Already tracking games")
                     return
                 else:
                     await self._start_tracking(action.split("start ")[-1])
-
+            elif "progress" in action:
+                await self._show_progress()
+                return
             elif "end" in action:
                 if len(self.players_to_track) == 0:
                     await self.send_message("Currently not tracking any players")
@@ -163,7 +197,6 @@ class MessageController:
         """Save the state of the controller to a file."""
         with open(filename, "wb") as file:
             pickle.dump({
-                "players_to_track": self.players_to_track,
                 "player_map": self.player_map,
                 "name": self.name,
             }, file)
@@ -174,7 +207,6 @@ class MessageController:
         if os.path.exists(filename):
             with open(filename, "rb") as file:
                 state = pickle.load(file)
-                self.players_to_track = state.get("players_to_track", {})
                 self.player_map = state.get("player_map", {})
                 self.name = state.get("name", "brawlbot")
             print(f"State loaded from {filename}")
@@ -182,6 +214,8 @@ class MessageController:
             print(f"No saved state found at {filename}")
 
     def __str__(self) -> str:
-        """Print all attributes of self"""
+        """Print all attributes of self except for players to track"""
         attributes = vars(self)
-        return '\n'.join(f"{key}: {value}" for key, value in attributes.items())
+        return '\n'.join(f"{key}: {value}"
+                         for key, value in attributes.items()
+                         if key != "players_to_track")
