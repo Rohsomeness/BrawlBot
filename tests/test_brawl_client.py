@@ -2,6 +2,7 @@ import unittest
 from unittest.mock import patch, Mock
 from brawl_client import BrawlClient
 
+
 class TestBrawlClient(unittest.TestCase):
     def setUp(self):
         self.brawl_client = BrawlClient()
@@ -10,7 +11,6 @@ class TestBrawlClient(unittest.TestCase):
     def test_get_player_info_success(self, mock_get):
         player_tag = "#PLAYER123"
         encoded_tag = "%23PLAYER123"
-        url = f"https://api.brawlstars.com/v1/players/{encoded_tag}"
 
         mock_response = Mock()
         expected_json = {
@@ -37,8 +37,6 @@ class TestBrawlClient(unittest.TestCase):
     @patch('brawl_client.requests.get')
     def test_get_player_info_not_found(self, mock_get):
         player_tag = "#UNKNOWN123"
-        encoded_tag = "%23UNKNOWN123"
-        url = f"https://api.brawlstars.com/v1/players/{encoded_tag}"
 
         mock_response = Mock()
         mock_response.status_code = 404

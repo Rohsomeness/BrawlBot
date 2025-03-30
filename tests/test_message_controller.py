@@ -5,6 +5,7 @@ from brawl_client import BrawlClient
 from message_controller import MessageController
 import pickle
 
+
 class TestMessageController(unittest.TestCase):
     def setUp(self):
         self.target_channel = AsyncMock(spec=TextChannel)
@@ -61,7 +62,7 @@ class TestMessageController(unittest.TestCase):
     def test_save_state(self, mock_pickle_dump, mock_open_file):
         self.controller.player_map = {"player1": "#12345"}
         self.controller.save_state()
-        
+
         mock_open_file.assert_called_once_with("message_controller_state.pkl", "wb")
         mock_pickle_dump.assert_called_once()
         _, args, _ = mock_pickle_dump.mock_calls[0]
@@ -80,13 +81,14 @@ class TestMessageController(unittest.TestCase):
             "player_map": {"player1": "#12345"},
             "name": "brawlbot"
         }
-        
+
         self.controller.load_state()
-        
+
         mock_open_file.assert_called_once_with("message_controller_state.pkl", "rb")
         mock_pickle_load.assert_called_once()
         self.assertEqual(self.controller.player_map, {"player1": "#12345"})
         self.assertEqual(self.controller.name, "brawlbot")
+
 
 if __name__ == "__main__":
     unittest.main()

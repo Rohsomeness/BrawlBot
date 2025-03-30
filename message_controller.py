@@ -1,4 +1,5 @@
 """Translate message to actions"""
+import datetime
 import os
 import pickle
 from discord import TextChannel
@@ -15,8 +16,10 @@ class MessageController:
         ]
         self.players_to_track: dict[str, dict] = {}
         self.player_map: dict[str, str] = {}
+        self.player_battle_map: dict[str, dict] = {}
         self.brawl_client = BrawlClient()
         self.target_channel = target_channel
+        self.start_time = None
 
     async def send_message(self, msg: str) -> None:
         """Send message to Discord server"""
@@ -75,6 +78,15 @@ class MessageController:
         self.player_map[player_name] = player_tag
         await self.send_message(f"Added player {player_name} with player tag {player_tag}")
 
+    async def _remove_player(self, player_name: str):
+        if player_name in self.player_map:
+            del self.player_map[player_name]
+            if player_name in self.players_to_track:
+                del self.players_to_track[player_name]
+            await self.send_message(f"Player {player_name} removed")
+        else:
+            await self.send_message(f"Could not find player {player_name} to remove")
+
     async def _start_tracking(self, names_to_track: str):
         """
         Start tracking a game. Log:
@@ -90,17 +102,55 @@ class MessageController:
                 return
             player_info = self.brawl_client.get_player_info(self.player_map[name])
             self.players_to_track[name] = player_info
+            self.player_battle_map[name] = {
+                "battle_start_times": {},
+                "star_players": 0,
+                "game_durations_s": 0,
+                "victories": 0,
+                "defeats": 0,
+            }
             start_tracking_msg += f"\tName: {name}, Start Trophies: {player_info['trophies']}\n"
         await self.send_message(start_tracking_msg)
+        self.start_time = datetime.datetime.now(tz=datetime.timezone.utc)
+
+    def update_battle_logs_periodically(self) -> None:
+        for name, battle_map in self.player_battle_map:
+            game_log = self.brawl_client.get_player_battle_logs(self.player_map[name])
+            for game_info in game_log:
+                if datetime.datetime.strptime(game_info["battleTime"], "%Y%m%dT%H%M%S.000Z") < self.start_time:
+                    continue
+                if game_info["battleTime"] in battle_map["battle_start_times"]:
+                    continue
+                battle_map["battle_start_times"].add(game_info["battleTime"])
+                if game_info["battle"]["starPlayer"]["tag"] == self.player_map[name]:
+                    battle_map["star_players"] += 1
+                battle_map["game_durations_s"] += game_info["battle"]["duration"]
+                battle_map["victories"] += 1 if game_info["battle"]["result"] == "vicory" else 0
+                battle_map["defeats"] += 1 if game_info["battle"]["result"] == "defeat" else 0
 
     async def _show_progress(self):
         """Show intermediate progresss"""
         msg = "Progress\n"
+        msg += "===== Battle Stats =====\n"
+        self.update_battle_logs_periodically()
+        for player, battle_map in self.player_battle_map:
+            msg += f"{player}:\n"
+            if battle_map["game_durations_s"] == 0:
+                continue
+            msg += f"\tGames: {len(battle_map['battle_start_times'])}\n"
+            msg += f"\tVictories: {battle_map['victories']}\n"
+            msg += f"\tDefeats: {battle_map['defeats']}\n"
+            msg += f"\tStar Players: {battle_map['star_players']}\n"
+            msg += f"\tGame Time: {battle_map['game_durations_s']}\n"
+
         msg += "===== Trophy Gains =====\n"
         for player, start_player_info in self.players_to_track.items():
             end_player_info = self.brawl_client.get_player_info(self.player_map[player])
             trophy_gain = end_player_info["trophies"] - start_player_info["trophies"]
-            msg += f"{player}: {trophy_gain}\n"
+            msg += (
+                f"{player}: Total: {trophy_gain}, "
+                f"TPS: {trophy_gain / (self.player_battle_map[player]['game_durations_s'] or 1)}\n"
+            )
             for brawler_num in range(len(end_player_info["brawlers"])):
                 start_trophies = start_player_info["brawlers"][brawler_num]["trophies"]
                 end_trophies = end_player_info["brawlers"][brawler_num]["trophies"]
@@ -112,11 +162,26 @@ class MessageController:
     async def _end_tracking(self):
         """End tracking of players"""
         msg = "Ended Tracking\n"
+        msg += "===== Battle Stats =====\n"
+        self.update_battle_logs_periodically()
+        for player, battle_map in self.player_battle_map:
+            msg += f"{player}:\n"
+            if battle_map["game_durations_s"] == 0:
+                continue
+            msg += f"\tGames: {len(battle_map['battle_start_times'])}\n"
+            msg += f"\tVictories: {battle_map['victories']}\n"
+            msg += f"\tDefeats: {battle_map['defeats']}\n"
+            msg += f"\tStar Players: {battle_map['star_players']}\n"
+            msg += f"\tGame Time: {battle_map['game_durations_s']}\n"
+
         msg += "===== Trophy Gains =====\n"
         for player, start_player_info in self.players_to_track.items():
             end_player_info = self.brawl_client.get_player_info(self.player_map[player])
             trophy_gain = end_player_info["trophies"] - start_player_info["trophies"]
-            msg += f"{player}: {trophy_gain}\n"
+            msg += (
+                f"{player}: Total: {trophy_gain}, "
+                f"TPS: {trophy_gain / (self.player_battle_map[player]['game_durations_s'] or 1)}\n"
+            )
             for brawler_num in range(len(end_player_info["brawlers"])):
                 start_trophies = start_player_info["brawlers"][brawler_num]["trophies"]
                 end_trophies = end_player_info["brawlers"][brawler_num]["trophies"]
@@ -124,6 +189,8 @@ class MessageController:
                     brawler_name = end_player_info["brawlers"][brawler_num]["name"]
                     msg += f"\t{brawler_name}: {end_trophies - start_trophies}\n"
         self.players_to_track = {}
+        self.start_time = None
+        self.player_battle_map = {}
         await self.send_message(msg)
 
     def _validate_message(self, msg: str) -> bool:
@@ -160,6 +227,8 @@ class MessageController:
             action = msg.split(f"!{self.name} ")[-1]
             if "reset" in action:
                 self.players_to_track = {}
+                self.player_battle_map = {}
+                self.start_time = None
                 await self.send_message("Cleared all tracked players")
                 return
             elif "grind" in action:
@@ -189,6 +258,11 @@ class MessageController:
                 name = action.split(" ", 2)[1]
                 tag = action.split(" ", 2)[-1]
                 await self._add_player(name, tag)
+
+            elif "remove" in action:
+                name = action.split(" ", 2)[1]
+                await self._remove_player(name)
+
         else:
             return
         self.save_state()
@@ -218,4 +292,4 @@ class MessageController:
         attributes = vars(self)
         return '\n'.join(f"{key}: {value}"
                          for key, value in attributes.items()
-                         if key != "players_to_track")
+                         if key not in {"players_to_track", "player_battle_map", "message_char_len_limit"})

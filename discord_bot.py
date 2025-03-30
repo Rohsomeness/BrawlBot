@@ -1,3 +1,4 @@
+import asyncio
 import discord
 from message_controller import MessageController
 
@@ -33,8 +34,20 @@ class DiscordBot:
             )
             self.message_controller.load_state()
             print("MessageController is ready")
+
+            self.client.loop.create_task(self.update_battle_logs_periodically())
         else:
             print(f"Could not find channel with ID {self.channel_id}")
+
+    async def update_battle_logs_periodically(self):
+        """Call update_battle_logs every 5 minutes."""
+        while True:
+            try:
+                if self.message_controller:
+                    self.message_controller.update_battle_logs()
+            except Exception as e:
+                print(f"Error updating battle logs: {e}")
+            await asyncio.sleep(300)  # 5 minutes
 
     async def on_message(self, message: discord.Message):
         """Called when a message is sent in a channel the bot has access to."""

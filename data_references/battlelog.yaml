@@ -1,0 +1,748 @@
+[
+    {'battleTime': '20250330T161628.000Z', 'event': {'id': 15000144, 'mode': 'brawlBall', 'map': 'Sunny Soccer'
+        }, 'battle': {'mode': 'brawlBall', 'type': 'ranked', 'result': 'defeat', 'duration': 150, 'trophyChange': -6, 'starPlayer': {'tag': '#2GCYG2GRJ', 'name': 'Im inya', 'brawler': {'id': 16000037, 'name': 'SPROUT', 'power': 11, 'trophies': 812
+                }
+            }, 'teams': [
+                [
+                    {'tag': '#80CQC8V8J', 'name': '◥꧁𝕮 𝕺 𝕹 𝕯 ◥', 'brawler': {'id': 16000005, 'name': 'SPIKE', 'power': 1    1, 'trophies': 828
+                        }
+                    },
+                    {'tag': '#QJ2GPQ809', 'name': 'Digital $AN', 'brawler': {'id': 16000077, 'name': 'LARRY & LAWRIE', 'power': 11, 'trophies': 858
+                        }
+                    },
+                    {'tag': '#PVYYY2V8', 'name': 'pabloski', 'brawler': {'id': 16000009, 'name': 'DYNAMIKE', 'power': 11, 'trophies': 851
+                        }
+                    }
+                ],
+                [
+                    {'tag': '#8C0RUVUQP', 'name': "IsaacO'Nasty", 'brawler': {'id': 16000008, 'name': 'NITA', 'power': 11, 'trophies': 808
+                        }
+                    },
+                    {'tag': '#2GCYG2GRJ', 'name': 'Im inya', 'brawler': {'id': 16000037, 'name': 'SPROUT', 'power': 11, 'trophies': 812
+                        }
+                    },
+                    {'tag': '#GQ9QPU22P', 'name': 'RIP_Blade', 'brawler': {'id': 16000009, 'name': 'DYNAMIKE', 'power': 11, 'trophies': 846
+                        }
+                    }
+                ]
+            ]
+        }
+    },
+    {'battleTime': '20250330T161326.000Z', 'event': {'id': 15000144, 'mode': 'brawlBall', 'map': 'Sunny Soccer'
+        }, 'battle': {'mode': 'brawlBall', 'type': 'ranked', 'result': 'victory', 'duration': 51, 'trophyChange': 11, 'starPlayer': {'tag': '#2GCYG2GRJ', 'name': 'Im inya', 'brawler': {'id': 16000037, 'name': 'SPROUT', 'power': 11, 'trophies': 801
+                }
+            }, 'teams': [
+                [
+                    {'tag': '#JYC00GY', 'name': 'Miguel', 'brawler': {'id': 16000038, 'name': 'SURGE', 'power': 11, 'trophies': 779
+                        }
+                    },
+                    {'tag': '#8C0RUVUQP', 'name': "IsaacO'Nasty", 'brawler': {'id': 16000008, 'name': 'NITA', 'power': 11, 'trophies': 797
+                        }
+                    },
+                    {'tag': '#2GCYG2GRJ', 'name': 'Im inya', 'brawler': {'id': 16000037, 'name': 'SPROUT', 'power': 11, 'trophies': 801
+                        }
+                    }
+                ],
+                [
+                    {'tag': '#9RURVR90U', 'name': 'matt', 'brawler': {'id': 16000048, 'name': 'GROM', 'power': 11, 'trophies': 796
+                        }
+                    },
+                    {'tag': '#2QV0G9CVRC', 'name': 'alexogamer', 'brawler': {'id': 16000008, 'name': 'NITA', 'power': 11, 'trophies': 797
+                        }
+                    },
+                    {'tag': '#28PPPUJGRC', 'name': '𝓟𝓪𝓷𝓭𝓪™🐼', '     brawler': {'id': 16000020, 'name': 'FRANK', 'power': 11, 'trophies': 719
+                        }
+                    }
+                ]
+            ]
+        }
+    },
+    {'battleTime': '20250330T161201.000Z', 'event': {'id': 15000144, 'mode': 'brawlBall', 'map': 'Sunny Soccer'
+        }, 'battle': {'mode': 'brawlBall', 'type': 'ranked', 'result': 'victory', 'duration': 157, 'trophyChange': 10, 'starPlayer': {'tag': '#2GCYG2GRJ', 'name': 'Im inya', 'brawler': {'id': 16000037, 'name': 'SPROUT', 'power': 11, 'trophies': 791
+                }
+            }, 'teams': [
+                [
+                    {'tag': '#8C0RUVUQP', 'name': "IsaacO'Nasty", 'brawler': {'id': 16000008, 'name': 'NITA', 'power': 11, 'trophies': 787
+                        }
+                    },
+                    {'tag': '#2GCYG2GRJ', 'name': 'Im inya', 'brawler': {'id': 16000037, 'name': 'SPROUT', 'power': 11, 'trophies': 791
+                        }
+                    },
+                    {'tag': '#9J8VL2CUV', 'name': 'lzbeastboi', 'brawler': {'id': 16000043, 'name': 'EDGAR', 'power': 10, 'trophies': 757
+                        }
+                    }
+                ],
+                [
+                    {'tag': '#C0922YL9G', 'name': 'Parzvalk', 'brawler': {'id': 16000019, 'name': 'PENNY', 'power': 11, 'trophies': 806
+                        }
+                    },
+                    {'tag': '#U0LU98LU', 'name': '+COR+WalkingPig', 'brawler': {'id': 16000063, 'name': 'CHESTER', 'power': 10, 'trophies': 782
+                        }
+                    },
+                    {'tag': '#8VYQCCUQG', 'name': 'godzilla', 'brawler': {'id': 16000006, 'name': 'BARLEY', 'power': 11, 'trophies': 783
+                        }
+                    }
+                ]
+            ]
+        }
+    },
+    {'battleTime': '20250330T160855.000Z', 'event': {'id': 15000144, 'mode': 'brawlBall', 'map': 'Sunny Soccer'
+        }, 'battle': {'mode': 'brawlBall', 'type': 'ranked', 'result': 'victory', 'duration': 53, 'trophyChange': 9, 'starPlayer': {'tag': '#89JUL22U2', 'name': 'TRG|doom', 'brawler': {'id': 16000003, 'name': 'BROCK', 'power': 9, 'trophies': 752
+                }
+            }, 'teams': [
+                [
+                    {'tag': '#89JUL22U2', 'name': 'TRG|doom', 'brawler': {'id': 16000003, 'name': 'BROCK', 'power': 9, 'trophies': 752
+                        }
+                    },
+                    {'tag': '#8C0RUVUQP', 'name': "IsaacO'Nasty", 'brawler': {'id': 16000008, 'name': 'NITA', 'power': 11, 'trophies': 778
+                        }
+                    },
+                    {'tag': '#2GCYG2GRJ', 'name': 'Im inya', 'brawler': {'id': 16000037, 'name': 'SPROUT', 'power': 11, 'trophies': 782
+                        }
+                    }
+                ],
+                [
+                    {'tag': '#2QCJ88VY0R', 'name': 'nangthathigger', 'brawler': {'id': 16000077, 'name': 'LARRY & LAWRIE', 'power': 10, 'trophies': 765
+                        }
+                    },
+                    {'tag': '#2LJVG8C8YY', 'name': 'jeff', 'brawler': {'id': 16000010, 'name': 'EL PRIMO', 'power': 9, 'trophies': 739
+                        }
+                    },
+                    {'tag': '#9L9R2V9UR', 'name': 'YouTube Joy|조이', 'brawler': {'id': 16000081, 'name': 'LILY', 'power': 11, 'trophies': 786
+                        }
+                    }
+                ]
+            ]
+        }
+    },
+    {'battleTime': '20250330T160732.000Z', 'event': {'id': 15000144, 'mode': 'brawlBall', 'map': 'Sunny Soccer'
+        }, 'battle': {'mode': 'brawlBall', 'type': 'ranked', 'result': 'victory', 'duration': 150, 'trophyChange': 8, 'starPlayer': {'tag': '#8C0RUVUQP', 'name': "IsaacO'Nasty", 'brawler': {'id': 16000008, 'name': 'NITA', 'power': 11, 'trophies': 770
+                }
+            }, 'teams': [
+                [
+                    {'tag': '#2GCYG2GRJ', 'name': 'Im inya', 'brawler': {'id': 16000037, 'name': 'SPROUT', 'power': 11, 'trophies': 774
+                        }
+                    },
+                    {'tag': '#8C0RUVUQP', 'name': "IsaacO'Nasty", 'brawler': {'id': 16000008, 'name': 'NITA', 'power': 11, 'trophies': 770
+                        }
+                    },
+                    {'tag': '#2GJLCYPQQ0', 'name': 'jacinto', 'brawler': {'id': 16000020, 'name': 'FRANK', 'power': 9, 'trophies': 740
+                        }
+                    }
+                ],
+                [
+                    {'tag': '#RR8VV2LR8', 'name': '😻sowi😻', 'brawler': {'id': 16000008, 'name': 'NITA', 'power': 11, 'trophies': 773
+                        }
+                    },
+                    {'tag': '#2QRPYGJ802', 'name': 'Brawler', 'brawler': {'id': 16000020, 'name': 'FRANK', 'power': 11, 'trophies': 774
+                        }
+                    },
+                    {'tag': '#YVLQJ0G8C', 'name': 'GM | ZAID!!', 'brawler': {'id': 16000038, 'name': 'SURGE', 'power': 11, 'trophies': 762
+                        }
+                    }
+                ]
+            ]
+        }
+    },
+    {'battleTime': '20250330T160206.000Z', 'event': {'id': 15000144, 'mode': 'brawlBall', 'map': 'Sunny Soccer'
+        }, 'battle': {'mode': 'brawlBall', 'type': 'ranked', 'result': 'defeat', 'duration': 134, 'trophyChange': -5, 'starPlayer': {'tag': '#9PV9JQYV0', 'name': 'D0N V3RG4S MEX', 'brawler': {'id': 16000081, 'name': 'LILY', 'power': 11, 'trophies': 786
+                }
+            }, 'teams': [
+                [
+                    {'tag': '#9PV9JQYV0', 'name': 'D0N V3RG4S MEX', 'brawler': {'id': 16000081, 'name': 'LILY', 'power': 11, 'trophies': 786
+                        }
+                    },
+                    {'tag': '#JQPR29VR9', 'name': 'Brawler', 'brawler': {'id': 16000010, 
+'name': 'EL PRIMO', 'power': 9, 'trophies': 760
+                        }
+                    },
+                    {'tag': '#UQRCQ899', 'name': 'shxny', 'brawler': {'id': 16000014, 'name': 'BO', 'power': 11, 'trophies': 785
+                        }
+                    }
+                ],
+                [
+                    {'tag': '#9C2RY292Y', 'name': 'snippyI', 'brawler': {'id': 16000090, 'name': 'OLLIE', 'power': 11, 'trophies': 767
+                        }
+                    },
+                    {'tag': '#2U0Q2Y2RQ', 'name': 'dman', 'brawler': {'id': 16000011, 'name': 'MORTIS', 'power': 11, 'trophies': 783
+                        }
+                    },
+                    {'tag': '#2GCYG2GRJ', 'name': 'Im inya', 'brawler': {'id': 16000037, 'name': 'SPROUT', 'power': 11, 'trophies': 779
+                        }
+                    }
+                ]
+            ]
+        }
+    },
+    {'battleTime': '20250330T155920.000Z', 'event': {'id': 15000144, 'mode': 'brawlBall', 'map': 'Sunny Soccer'
+        }, 'battle': {'mode': 'brawlBall', 'type': 'ranked', 'result': 'victory', 'duration': 150, 'trophyChange': 9, 'starPlayer': {'tag': '#2GCYG2GRJ', 'name': 'Im inya', 'brawler': {'id': 16000037, 'name': 'SPROUT', 'power': 11, 'trophies': 770
+                }
+            }, 'teams': [
+                [
+                    {'tag': '#2YYP20P8YQ', 'name': 'COLTZADDY', 'brawler': {'id': 16000038, 'name': 'SURGE', 'power': 11, 'trophies': 791
+                        }
+                    },
+                    {'tag': '#888VURUV8', 'name': 'Doms|Liam', 'brawler': {'id': 16000040, 'name': 'AMBER', 'power': 11, 'trophies': 793
+                        }
+                    },
+                    {'tag': '#2QJ0P90VG9', 'name': 'netsorr1', 'brawler': {'id': 16000020, 'name': 'FRANK', 'power': 11, 'trophies': 789
+                        }
+                    }
+                ],
+                [
+                    {'tag': '#2RGUGVLJG', 'name': 'Im a Noobi', 'brawler': {'id': 16000003, 'name': 'BROCK', 'power': 10, 'trophies': 779
+                        }
+                    },
+                    {'tag': '#2GCYG2GRJ', 'name': 'Im inya', 'brawler': {'id': 16000037, 'name': 'SPROUT', 'power': 11, 'trophies': 770
+                        }
+                    },
+                    {'tag': '#9PV9JQYV0', 'name': 'D0N V3RG4S MEX', 'brawler': {'id': 16000081, 'name': 'LILY', 'power': 11, 'trophies': 775
+                        }
+                    }
+                ]
+            ]
+        }
+    },
+    {'battleTime': '20250330T155624.000Z', 'event': {'id': 15000144, 'mode': 'brawlBall', 'map': 'Sunny Soccer'
+        }, 'battle': {'mode': 'brawlBall', 'type': 'ranked', 'result': 'victory', 'duration': 74, 'trophyChange': 8, 
+'starPlayer': {'tag': '#2GCYG2GRJ', 'name': 'Im inya', 'brawler': {'id': 16000037, 'name': 'SPROUT', 'power': 11, 'trophies': 762
+                }
+            }, 'teams': [
+                [
+                    {'tag': '#GJCGQRU9Q', 'name': 'Grayson007', 'brawler': {'id': 16000025, 'name': 'CARL', 'power': 11, 'trophies': 737
+                        }
+                    },
+                    {'tag': '#Y9PYLGLRY', 'name': 'Stonesinew', 'brawler': {'id': 16000014, 'name': 'BO', 'power': 9, 'trophies': 725
+                        }
+                    },
+                    {'tag': '#992QQ9QY8', 'name': 'pessidog17', 'brawler': {'id': 16000004, 'name': 'RICO', 'power': 11, 'trophies': 721
+                        }
+                    }
+                ],
+                [
+                    {'tag': '#2GCYG2GRJ', 'name': 'Im inya', 'brawler': {'id': 16000037, 'name': 'SPROUT', 'power': 11, 'trophies': 762
+                        }
+                    },
+                    {'tag': '#9YRJ8GQLL', 'name': "❣𓊈Soy_D'Ashly❣", 'brawler': {'id': 16000002, 'name': 'BULL', 'power': 11, 'tro 
+phies': 740
+                        }
+                    },
+                    {'tag': '#YCPLCPPV8', 'name': 'Lx|Bowi🍄', 'brawler': {'id': 16000020, 'name': 'FRANK', 'power': 9, 'trophies': 722
+                        }
+                    }
+                ]
+            ]
+        }
+    },
+    {'battleTime': '20250330T155441.000Z', 'event': {'id': 15000144, 'mode': 'brawlBall', 'map': 'Sunny Soccer'
+        }, 'battle': {'mode': 'brawlBall', 'type': 'ranked', 'result': 'defeat', 'duration': 143, 'trophyChange': -5, 'starPlayer': {'tag': '#J8QP0U0P', 'name': 'MS|MC EJ', 'brawler': {'id': 16000013, 'name': 'POCO', 'power': 11, 'trophies': 799
+                }
+            }, 'teams': [
+                [
+                    {'tag': '#LY20RQ9QJ', 'name': 'Jarztx.IG', 'brawler': {'id': 16000011, 'name': 'MORTIS', 'power': 10, 'trophies': 751
+                        }
+                    },
+                    {'tag': '#J8QP0U0P', 'name': 'MS|MC EJ', 'brawler': {'id': 16000013, 'name': 'POCO', 'power': 11, 'trophies': 799
+                        }
+                    },
+                    {'tag': '#2QQJL9G28P', 'name': 'Chorizo07', 'brawler': {'id': 16000018, 'name': 'DARRYL', 'power': 11, 'trophies': 747
+                        }
+                    }
+                ],
+                [
+                    {'tag': '#28YJPP0LVR', 'name': 'kai', 'brawler': {'id': 16000001, 'name': 'COLT', 'power': 11, 'trophies': 765
+                        }
+                    },
+                    {'tag': '#2GCYG2GRJ', 'name': 'Im inya', 'brawler': {'id': 16000037, 'name': 'SPROUT', 'power': 11, 'trophies': 767
+                        }
+                    },
+                    {'tag': '#280GVYRR29', 'name': 'Lia', 'brawler': {'id': 16000025, 'name': 'CARL', 'power': 11, 'trophies': 773
+                        }
+                    }
+                ]
+            ]
+        }
+    },
+    {'battleTime': '20250330T155108.000Z', 'event': {'id': 15000144, 'mode': 'brawlBall', 'map': 'Sunny Soccer'
+        }, 'battle': {'mode': 'brawlBall', 'type': 'ranked', 'result': 'defeat', 'duration': 150, 'trophyChange': -5, 'starPlayer': {'tag': '#2GCYG2GRJ', 'name': 'Im inya', 'brawler': {'id': 16000037, 'name': 'SPROUT', 'power': 11, 'trophies': 772
+                }
+            }, 'teams': [
+                [
+                    {'tag': '#YQLQCVCRC', 'name': 'Ur🤡Buns🤡', 'brawler': {'id': 16000020, 'name': 'FRANK', 'power': 11, 'trophies': 758
+                        }
+                    },
+                    {'tag': '#PQL9GCLQ2', 'name': 'Iori Yagami💀', 'brawler': {'id': 16000085, 'name': 'KENJI', 'power': 11, 'trophies': 784
+                        }
+                    },
+                    {'tag': '#RUYJRC82P', 'name': 'destructor', 'brawler': {'id': 16000023, 'name': 'LEON', 'power': 11, 'trophies': 783
+                        }
+                    }
+                ],
+                [
+                    {'tag': '#2QLQVGYLP9', 'name': 'wsg', 'brawler': {'id': 16000001, 'name': 'COLT', 'power': 9, 'trophies': 787
+                        }
+                    },
+                    {'tag': '#2GCYG2GRJ', 'name': 'Im inya', 'brawler': {'id': 16000037, 'name': 'SPROUT', 'power': 11, 'trophies': 772
+                        }
+                    },
+                    {'tag': '#90Q8R0QC2', 'name': 'Sasc', 'brawler': {'id': 16000057, 'name': 'JANET', 'power': 11, 'trophies': 783
+                        }
+                    }
+                ]
+            ]
+        }
+    },
+    {'battleTime': '20250330T154803.000Z', 'event': {'id': 15000144, 'mode': 'brawlBall', 'map': 'Sunny Soccer'
+        }, 'battle': {'mode': 'brawlBall', 'type': 'ranked', 'result': 'victory', 'duration': 31, 'trophyChange': 13, 'starPlayer': {'tag': '#2QLQVGYLP9', 'name': 'wsg', 'brawler': {'id': 16000001, 'name': 'COLT', 'power': 9, 'trophies': 777
+                }
+            }, 'teams': [
+                [
+                    {'tag': '#2QLQVGYLP9', 'name': 'wsg', 'brawler': {'id': 16000001, 'name': 'COLT', 'power': 9, 'trophies': 777
+                        }
+                    },
+                    {'tag': '#2GCYG2GRJ', 'name': 'Im inya', 'brawler': {'id': 16000037, 'name': 'SPROUT', 'power': 11, 'trophies': 759
+                        }
+                    },
+                    {'tag': '#8UVYPLUV0', 'name': 'SK| Yxel', 'brawler': {'id': 16000003, 'name': 'BROCK', 'power': 11, 'trophies': 784
+                        }
+                    }
+                ],
+                [
+                    {'tag': '#PQ0YRQPRV', 'name': 'rafa432', 'brawler': {'id': 16000068, 'name': 'MAISIE', 'power': 11, 'trophies': 782
+                        }
+                    },
+                    {'tag': '#GLQ0QL0C0', 'name': '고양이 🐈', 'brawler': {'id': 16000038, 'name': 'SURGE', 'power': 11, 'trophies': 787
+                        }
+                    },
+                    {'tag': '#8RLYCRQQ', 'name': 'NURLIN', 'brawler': {'id': 16000054, 'name': 'FANG', 'power': 11, 'trophies': 772
+                        }
+                    }
+                ]
+            ]
+        }
+    },
+    {'battleTime': '20250330T154704.000Z', 'event': {'id': 15000144, 'mode': 'brawlBall', 'map': 'Sunny Soccer'
+        }, 'battle': {'mode': 'brawlBall', 'type': 'ranked', 'result': 'victory', 'duration': 111, 'trophyChange': 12, 'starPlayer': {'tag': '#2QLQVGYLP9', 'name': 'wsg', 'brawler': {'id': 16000001, 'name': 'COLT', 'power': 9, 'trophies': 768
+                }
+            }, 'teams': [
+                [
+                    {'tag': '#JG08JP8PU', 'name': 'lord farquad', 'brawler': {'id': 16000038, 'name': 'SURGE', 'power': 11, 'trophies': 744
+                        }
+                    },
+                    {'tag': '#9C20RQ9QV', 'name': 'KhortX', 'brawler': {'id': 16000010, 'name': 'EL PRIMO', 'power': 10, 'trophies': 739
+                        }
+                    },
+                    {'tag': '#8LLJYCRUC', 'name': 'Raymon legend', 'brawler': {'id': 16000045, 'name': 'STU', 'power': 10, 'trophies': 765
+                        }
+                    }
+                ],
+                [
+                    {'tag': '#20JUYJ0YPY', 'name': 'poncho', 'brawler': {'id': 16000063, 'name': 'CHESTER', 'power': 11, 'trophies': 746
+                        }
+                    },
+                    {'tag': '#2GCYG2GRJ', 'name': 'Im inya', 'brawler': {'id': 16000037, 'name': 'SPROUT', 'power': 11, 'trophies': 747
+                        }
+                    },
+                    {'tag': '#2QLQVGYLP9', 'name': 'wsg', 'brawler': {'id': 16000001, 'name': 'COLT', 'power': 9, 'trophies': 768
+                        }
+                    }
+                ]
+            ]
+        }
+    },
+    {'battleTime': '20250330T154421.000Z', 'event': {'id': 15000144, 'mode': 'brawlBall', 'map': 'Sunny Soccer'
+        }, 'battle': {'mode': 'brawlBall', 'type': 'ranked', 'result': 'victory', 'duration': 120, 'trophyChange': 11, 'starPlayer': {'tag': '#2RGGYVPJYR', 'name': 'boredom', 'brawler': {'id': 16000010, 'name': 'EL PRIMO', 'power': 11, 'trophies': 691
+                }
+            }, 'teams': [
+                [
+                    {'tag': '#2QR98VYVVC', 'name': 'EndGameN8', 'brawler': {'id': 16000090, 'name': 'OLLIE', 'power': 11, 'trophies': 699
+                        }
+                    },
+                    {'tag': '#8ULV2R9LY', 'name': 'OP_WEDGIE', 'brawler': {'id': 16000038, 'name': 'SURGE', 'power': 10, 'trophies': 718
+                        }
+                    },
+                    {'tag': '#20UUQGLVU', 'name': 'Bot:) Dparval:)', 'brawler': {'id': 16000037, 'name': 'SPROUT', 'power': 11, 'trophies': 695
+                        }
+                    }
+                ],
+                [
+                    {'tag': '#2GCYG2GRJ', 'name': 'Im inya', 'brawler': {'id': 16000037, 'name': 'SPROUT', 'power': 11, 'trophies': 736
+                        }
+                    },
+                    {'tag': '#2Q8YRY8G00', 'name': 'Hello', 'brawler': {'id': 16000005, 'name': 'SPIKE', 'power': 11, 'trophies': 733
+                        }
+                    },
+                    {'tag': '#2RGGYVPJYR', 'name': 'boredom', 'brawler': {'id': 16000010, 'name': 'EL PRIMO', 'power': 11, 'trophies': 691
+                        }
+                    }
+                ]
+            ]
+        }
+    },
+    {'battleTime': '20250330T154038.000Z', 'event': {'id': 15000144, 'mode': 'brawlBall', 'map': 'Sunny Soccer'
+        }, 'battle': {'mode': 'brawlBall', 
+'type': 'ranked', 'result': 'victory', 'duration': 199, 'trophyChange': 13, 'starPlayer': {'tag': '#2GCYG2GRJ', 'name': 'Im inya', 'brawler': {'id': 16000038, 'name': 'SURGE', 'power': 9, 'trophies': 682
+                }
+            }, 'teams': [
+                [
+                    {'tag': '#2QQV9PJG82', 'name': 'Minipro193', 'brawler': {'id': 16000011, 'name': 'MORTIS', 'power': 9, 'trophies': 651
+                        }
+                    },
+                    {'tag': '#2GCYG2GRJ', 'name': 'Im inya', 'brawler': {'id': 16000038, 'name': 'SURGE', 'power': 9, 'trophies': 682
+                        }
+                    },
+                    {'tag': '#99LP8LV8G', 'name': 'GirthQuake', 'brawler': {'id': 16000028, 'name': 'SANDY', 'power': 11, 'trophies': 671
+                        }
+                    }
+                ],
+                [
+                    {'tag': '#2GRC2PC9RC', 'name': 'Matiasflowx 🥵', 'brawler': {'id': 16 000000, 'name': 'SHELLY', 'power': 11, 'trophies': 652
+                        }
+                    },
+                    {'tag': '#JRGLP8PRC', 'na
+me': 'Poco es loco', 'brawler': {'id': 16000010, 'name': 'EL PRIMO', 'power': 10, 'trophies': 643
+                        }
+                    },
+                    {'tag': '#CLG0R0CY', 'name': 'ESTELAR =0', 'brawler': {'id': 16000038, 'name': 'SURGE', 'power': 11, 'trophies': 679
+                        }
+                    }
+                ]
+            ]
+        }
+    },
+    {'battleTime': '20250330T153509.000Z', 'event': {'id': 15000718, 'mode': 'knockout', 'map': 'Out in the Open'
+        }, 'battle': {'mode': 'knockout', 'type': 'ranked', 'result': 'defeat', 'duration': 181, 'starPlayer': {'tag': '#LU0GJ90L', 'name': '𝓓𝓪𝓫𝓲𝓭𝓮🦁', 'brawler': {'id': 16000003, 'name': 'BROCK', 'power': 11, 'trophi      
+es': 967
+                }
+            }, 'teams': [
+                [
+                    {'tag': '#LU0GJ90L', 'name': '𝓓𝓪𝓫𝓲𝓭𝓮🦁', 'brawler': {'id': 16000003, 'n      ame': 'BROCK', 'power': 11, 'trophies': 967
+                        }
+                    },
+                    {'tag': '#98CCP0YJ8', 'name': 'jordy🃏', 'brawler': {'id': 16000015, 'name': 'PIPER', 'power': 11, 'trophies': 1000
+                        }
+                    },
+                    {'tag': '#YV9VUUCCU', 'name': 'UsingUrMomsWifi', 'brawler': {'id': 16000043, 'name': 'EDGAR', 'power': 11, 'trophies': 1001
+                        }
+                    }
+                ],
+                [
+                    {'tag': '#99LP8LV8G', 'name': 'GirthQuake', 'brawler': {'id': 16000081, 'name': 'LILY', 'power': 10, 'trophies': 980
+                        }
+                    },
+                    {'tag': '#2GCYG2GRJ', 'name': 'Im 
+inya', 'brawler': {'id': 16000079, 'name': 'ANGELO', 'power': 11, 'trophies': 1000
+                        }
+                    },
+                    {'tag': '#YPRPGU0P0', 'name': 'ㅤMattㅤ🦕', 'brawler': {'id': 16000015, 'name': 'PIPER', 'power': 11, 'trophies': 1000
+                        }
+                    }
+                ]
+            ]
+        }
+    },
+    {'battleTime': '20250330T153057.000Z', 'event': {'id': 15000716, 'mode': 'knockout', 'map': "Belle's Rock"
+        }, 'battle': {'mode': 'knockout', 'type': 'ranked', 'result': 'victory', 'duration': 171, 'starPlayer': {'tag': '#2GCYG2GRJ', 'name': 'Im inya', 'brawler': {'id': 16000042, 'name': 'BYRON', 'power': 11, 'trophies': 1002
+                }
+            }, 'teams': [
+                [
+                    {'tag': '#PCVLQVYG0', 'name': 'BBL|SnowDough⛩️', 'brawler': {'id': 16000064, 'name': 'GRAY', 'power': 11, 'trophies': 1000
+                        }
+                    },
+                    {'tag': '#2GCYG2GRJ', 'name': 'Im inya', 'brawler': {'
+id': 16000042, 'name': 'BYRON', 'power': 11, 'trophies': 1002
+                        }
+                    },
+                    {'tag': '#99LP8LV8G', 'name': 'GirthQuake', 'brawler': {'id': 16000043, 'name': 'EDGAR', 'power': 11, 'trophies': 922
+                        }
+                    }
+                ],
+                [
+                    {'tag': '#GC0JL20VG', 'name': 'yvngbuck', 'brawler': {'id': 16000077, 'name': 'LARRY & LAWRIE', 'power': 11, 'trophies': 666
+                        }
+                    },
+                    {'tag': '#C8R0VGVY', 'name': 'chinalake', 'brawler': {'id': 16000061, 'name': 'GUS', 'power': 11, 'trophies': 813
+                        }
+                    },
+                    {'tag': '#8V8UGR0RU', 'name': 'snoy', 'brawler': {'id': 16000048, 'name': 'GROM', 'power': 11, 'trophies': 1000
+                        }
+                    }
+                ]
+            ]
+        }
+    },
+    {'battleTime': '20250330T152701.000Z', 'event': {'id': 15000716, 'mode': 'knockout', 'map': "Belle's Rock"
+        }, 'battle': {'mode': 'knockout', 'type': 'ranked', 'result': 'defeat', 'duration': 88, 'starPlayer': {'tag': '#C89URJJ2', 'name': 'Aldo', 'brawler': {'id': 16000048, 'name': 'GROM', 'power': 11, 'trophies': 1000
+                }
+            }, 'teams': [
+                [
+                    {'tag': '#C89URJJ2', 'name': 'Aldo', 'brawler': {'id': 16000048, 'name': 'GROM', 'power': 11, 'trophies': 1000
+                        }
+                    },
+                    {'tag': '#92C80VGCQ', 'name': '😎Santi🤔el pro', 'brawler': {'id': 16000065, 'name': 'MANDY', 'power': 11, 'trophies': 1000
+                        }
+                    },
+                    {'tag': '#Q9YVG90Y9', 'name': 'NPC', 'brawler': {'id': 16000054, 'name': 'FANG', 'power': 11, 'trophies': 1030
+                        }
+                    }
+                ],
+                [
+                    {'tag': '#99LP8LV8G', 'name': 'GirthQuake', 'brawler': {'id': 16000047, 'name': 'SQUEAK', 'power': 10, 'trophies': 1000
+                        }
+                    },
+                    {'tag': '#2GCYG2GRJ', 'name': 'Im inya', 'brawler': {'id': 16000006, 'name': 'BARLEY', 'power': 11, 'trophies': 877
+                        }
+                    },
+                    {'tag': '#GLJU2PRP9', 'name': 'ᴳˡᵘᵗᵗᵒⁿʸ', 'brawler': {'id': 16000022, 'name': 'TICK', 'power': 11, 'trophies': 862
+                        }
+                    }
+                ]
+            ]
+        }
+    },
+    {'battleTime': '20250330T152424.000Z', 'event': {'id': 15000144, 'mode': 'brawlBall', 'map': 'Sunny Soccer'
+        }, 'battle': {'mode': 'brawlBall', 'type': 'ranked', 'result': 'defeat', 'duration': 123, 'trophyChange': -6, 'starPlayer': {'tag': '#2LJPPY2ULQ', 'name': 'A|ALEXANDER', 'brawler': {'id': 16000070, 'name': 'CORDELIUS', 'power': 9, 'trophies': 857
+                }
+            }, 'teams': [
+                [
+                    {'tag': '#2GCYG2GRJ', 'name': 'Im inya', 'brawler': {'id': 16000006, 'name': 'BARLEY', 'power': 11, 'trophies': 883
+                        }
+                    },
+                    {'tag': '#2G2PQU8JJY', 'name': 'Ben342', 'brawler': {'id': 16000009, 'name': 'DYNAMIKE', 'power': 11, 'trophies': 876
+                        }
+                    },
+                    {'tag': '#LR90V09V0', 'name': 'ChuChoPrime', 'brawler': {'id': 16000011, 'name': 'MORTIS', 'power': 11, 'trophies': 877
+                        }
+                    }
+                ],
+                [
+                    {'tag': '#2LJPPY2ULQ', 'name': 'A|ALEXANDER', 'brawler': {'id': 16000070, 'name': 'CORDELIUS', 'power': 9, 'trophies': 857
+                        }
+                    },
+                    {'tag': '#28VYQVLR', 'name': 'Risotto Nero ☠', 'brawler': {'id': 16000067, 'name': 'WILLOW', 'power': 11, 'trophies': 841
+                        }
+                    },
+                    {'tag': '#2YCV9Y98UP', 'name': 'SCHMITZZ🥶', 'brawler': {'id': 16000043,  'name': 'EDGAR', 'power': 11, 'trophies': 888
+                        }
+                    }
+                ]
+            ]
+        }
+    },
+    {'battleTime': '20250330T0409
+01.000Z', 'event': {'id': 15000920, 'mode': 'wipeout5V5', 'map': 'Big Battle Basin'
+        }, 'battle': {'mode': 'wipeout', 'type': 'ranked', 'result': 'victory', 'duration': 171, 'trophyChange': 8, 'starPlayer': {'tag': '#22YPR8CJ', 'name': 'loldragonlord', 'brawler': {'id': 16000014, 'name': 'BO', 'power': 11, 'trophies': 591
+                }
+            }, 'teams': [
+                [
+                    {'tag': '#2GCYG2GRJ', 'name': 
+'Im inya', 'brawler': {'id': 16000057, 'name': 'JANET', 'power': 11, 'trophies': 701
+                        }
+                    },
+                    {'tag': '#99LP8LV8G', 'name': 'GirthQuake', 'brawler': {'id': 16000009, 'name': 'DYNAMIKE', 'power': 10, 'trophies': 840
+                        }
+                    },
+                    {'tag': '#PY2PQC9Q', 'name': 'Spandad', 'brawler': {'id': 16000081, 'name': 'LILY', 'power': 9, 'trophies': 929
+                        }
+                    },
+                    {'tag': '#PU298UL8', 'name': 'Altershock', 'brawler': {'id': 16000079, 'name': 'ANGELO', 'power': 9, 'trophies': 507
+                        }
+                    },
+                    {'tag': '#22YPR8CJ', 'name': 'loldragonlord', 'brawler': {'id': 16000014, 'name': 'BO', 'power': 11, 'trophies': 591
+                        }
+                    }
+                ],
+                [
+                    {'tag': '#2RCCRQ8', 'name': 'Rinzler', 'brawler': {'id': 16000072, 'name': 'PEARL', 'power': 11, 'trophies': 895
+                        }
+                    },
+                    {'tag': '#20P2PJQU', 'name': 'Monkey D. Luffy', 'brawler': {'id': 16000085, 'name': 'KENJI', 'power': 10, 'trophies': 882
+                        }
+                    },
+                    {'tag': '#VL20YYJP2', 'name': 'Mika˙\u2060๑', 'brawler': {'id': 16000007, 'name': 'JESSIE', 'power': 11, 
+'trophies': 868
+                        }
+                    },
+                    {'tag': '#PJ98PPJVR', 'name': 'anyi', 'brawler': {'id': 16000065, 'name': 'MANDY', 'power': 11, 'trophies': 932
+                        }
+                    },
+                    {'tag': '#29820JYL', 'name': 'Blakmaster', 'brawler': {'id': 16000047, 'name': 'SQUEAK', 'power': 11, 'trophies': 936
+                        }
+                    }
+                ]
+            ]
+        }
+    },
+    {'battleTime': '20250329T193712.000Z', 'event': {'id': 15000292, 'mode': 'hotZone', 'map': 'Open Business'
+        }, 'battle': {'mode': 'hotZone', 'type': 'ranked', 'result': 'victory', 'duration': 98, 'trophyChange': 9, 'starPlayer': {'tag': '#2QRYJGYUL', 'name': 'ElLonjas', 'brawler': {'id': 16000022, 'name': 'TICK', 'power': 11, 'trophies': 757
+                }
+            }, 'teams': [
+                [
+                    {'tag': '#Q8V002YPR', 'name': 'graeme', 'brawler': {'id': 16000020, 'name': 'FRANK', 'power': 11, 'trophies': 793
+                        }
+                    },
+                    {'tag': '#2GRUY99J9U', 'name': 'Noble', 'brawler': {'id': 16000019, 'name': 'PENNY', 'power': 11, 'trophies': 715
+                        }
+                    },
+                    {'tag': '#299J99PLVY', 'name': 'MPLT | CERBERO', 'brawler': {'id': 16000082, 'name': 'BERRY', 'power': 11, 'trophies': 758
+                        }
+                    }
+                ],
+                [
+                    {'tag': '#2QRYJGYUL', 'name': 'ElLonjas', 'brawler': {'id': 16000022, 'name': 'TICK', 'power': 11, 'trophies': 757
+                        }
+                    },
+                    {'tag': '#2GCYG2GRJ', 'name': 'Im inya', 'brawler': {'id': 16000041, 'name': 'LOU', 'power': 11, 'trophies': 778
+                        }
+                    },
+                    {'tag': '#9RY20PQ8U', 'name': 'l_BeyondSpace_l', 'brawler': {'id': 16000034, 'name': 'JACKY', 'power': 11, 'trophies': 794
+                        }
+                    }
+                ]
+            ]
+        }
+    },
+    {'battleTime': '20250329T193505.000Z', 'event': {'id': 15000292, 'mode': 'hotZone', 'map': 'Open Business'
+        }, 'battle': {'mode': 'hotZone', 'type': 'ranked', 'result': 'victory', 'duration': 68, 'trophyChange': 8, 'starPlayer': {'tag': '#2GCYG2GRJ', 'name': 'Im inya', 'brawler': {'id': 16000041, 'name': 'LOU', 'power': 11, 'trophies': 770
+                }
+            }, 'teams': [
+                [
+                    {'tag': '#9RY20PQ8U', 'name': 'l_BeyondSpace_l', 'brawler': {'id': 16000034, 'name': 'JACKY', 'power': 11, 'trophies': 781
+                        }
+                    },
+                    {'tag': '#2GCYG2GRJ', 'name': 'Im inya', 'brawler': {'id': 16000041, 'name': 'LOU', 'power': 11, 'trophies': 770
+                        }
+                    },
+                    {'tag': '#2QRYJGYUL', 'name': 'ElLonjas', 'brawler': {'id': 16000022, 'name': 'TICK', 'power': 11, 'trophies': 749
+                        }
+                    }
+                ],
+                [
+                    {'tag': '#28YV2LG0LR', 'name': 'doradaexplora', 'brawler': {'id': 16000007, 'name': 'JESSIE', 'power': 11, 'trophies': 638
+                        }
+                    },
+                    {'tag': '#R0CG29CCC', 'name': 'gampajim', 'brawler': {'id': 16000039, 'name': 'COLETTE', 'power': 11, 'trophies': 722
+                        }
+                    },
+                    {'tag': '#2GLQYQPGR2', 'name': 'barly', 'brawler': {'id': 16000036, 'name': 'NANI', 'power': 11, 'trophies': 716
+                        }
+                    }
+                ]
+            ]
+        }
+    },
+    {'battleTime': '20250329T193328.000Z', 'event': {'id': 15000292, 'mode': 'hotZone', 'map': 'Open Business'
+        }, 'battle': {'mode': 'hotZone', 'type': 'ranked', 'result': 'defeat', 'duration': 135, 'trophyChange': -5, 'starPlayer': {'tag': '#2Y2LLLRRC', 'name': 'ImNotAdrian', 'brawler': {'id': 16000063, 'name': 'CHESTER', 'power': 10, 'trophies': 702
+                }
+            }, 'teams': [
+                [
+                    {'tag': '#P0080Y2Q', 'name': 'Sullivan', 'brawler': {'id': 16000052, 'name': 'MEG', 'power': 11, 'trophies': 657
+                        }
+                    },
+                    {'tag': '#2Q0R22GR9V', 'name': 'MYBUTT', 'brawler': {'id': 16000005, 'name': 'SPIKE', 'power': 11, 'trophies': 662
+                        }
+                    },
+                    {'tag': '#2Y2LLLRRC', 'name': 'ImNotAdrian', 'brawler': {'id': 16000063, 'name': 'CHESTER', 'power': 10, 'trophies': 702
+                        }
+                    }
+                ],
+                [
+                    {'tag': '#9VRVC9P0L', 'name': 'Fofis', 'brawler': {'id': 16000037, 'name': 'SPROUT', 'power': 11, 'trophies': 719
+                        }
+                    },
+                    {'tag': '#2QQYPJ98RC', 'name': 'YeahJune', 'brawler': {'id': 16000014, 'name': 'BO', 'power': 11, 'trophies': 776
+                        }
+                    },
+                    {'tag': '#2GCYG2GRJ', 'name': 'Im inya', 'brawler': {'id': 16000041, 'name': 'LOU', 'power': 11, 'trophies': 775
+                        }
+                    }
+                ]
+            ]
+        }
+    },
+    {'battleTime': '20250329T190806.000Z', 'event': {'id': 15000855, 'mode': 'unknown', 'map': 'Starr Garden'
+        }, 'battle': {'mode': 'brawlBall', 'type': 'soloRanked', 'result': 'victory', 'duration': 118, 'starPlayer': {'tag': '#2GCYG2GRJ', 'name': 'Im inya', 'brawler': {'id': 16000029, 'name': 'BEA', 'power': 11, 'trophies': 15
+                }
+            }, 'teams': [
+                [
+                    {'tag': '#8LQYG90YG', 'name': 'LilDylute52', 'brawler': {'id': 16000054, 'name': 'FANG', 'power': 11, 'trophies': 15
+                        }
+                    },
+                    {'tag': '#PJ2LJP0G', 'name': 'H A W A I ‘ I', 'brawler': {'id': 16000035, 'name': 'GALE', 'power': 11, 'trophies': 15
+                        }
+                    },
+                    {'tag': '#2GCYG2GRJ', 'name': 'Im inya', 'brawler': {'id': 16000029, 'name': 'BEA', 'power': 11, 'trophies': 15
+                        }
+                    }
+                ],
+                [
+                    {'tag': '#GCCYL9CGR', 'name': 'Chamoy', 'brawler': {'id': 16000008, 'name': 'NITA', 'power': 11, 'trophies': 15
+                        }
+                    },
+                    {'tag': '#R8UUP2PJL', 'name': 'main piper 💤👻', 'brawler': {'id': 16000001, 'name': 'COLT', 'power': 11, 'trophies': 15
+                        }
+                    },
+                    {'tag': '#98U9YU99C', 'name': 'PatheticNerd', 'brawler': {'id': 16000032, 'name': 'MAX', 'power': 11, 'trophies': 15
+                        }
+                    }
+                ]
+            ]
+        }
+    },
+    {'battleTime': '20250329T190548.000Z', 'event': {'id': 15000855, 'mode': 'unknown', 'map': 'Starr Garden'
+        }, 'battle': {'mode': 'brawlBall', 'type': 'soloRanked', 'result': 'defeat', 'duration': 150, 'starPlayer': None, 'teams': [
+                [
+                    {'tag': '#8LQYG90YG', 'name': 'LilDylute52', 'brawler': {'id': 16000054, 'name': 'FANG', 'power': 11, 'trophies': 15
+                        }
+                    },
+                    {'tag': '#PJ2LJP0G', 'name': 
+'H A W A I ‘ I', 'brawler': {'id': 16000035, 'name': 'GALE', 'power': 11, 'trophies': 15
+                        }
+                    },
+                    {'tag': '#2GCYG2GRJ', 'name': 'Im inya', 'brawler': {'id': 16000029, 'name': 'BEA', 'power': 11, 'trophies': 15
+                        }
+                    }
+                ],
+                [
+                    {'tag': '#GCCYL9CGR', 'name': 'Chamoy', 'brawler': {'id': 16000008, 'name': 'NITA', 'power': 11, 'trophies': 15
+                        }
+                    },
+                    {'tag': '#R8UUP2PJL', 'name': 'main piper 
+💤👻', 'brawler': {'id': 16000001, 'name': 'COLT', 'power': 11, 'trophies': 15
+                        }
+                    },
+                    {'tag': '#98U9YU99C', 'name': 'PatheticNerd', 'brawler': {'id': 16000032, 'name': 'MAX', 'power': 11, 'trophies': 15
+                        }
+                    }
+                ]
+            ]
+        }
+    },
+    {'battleTime': '20250329T190300.000Z', 'event': {'id': 15000855, 'mode': 'unknown', 'map': 'Starr Garden'
+        }, 'battle': {'mode': 'brawlBall', 'type': 'soloRanked', 'result': 'victory', 'duration': 182, 'starPlayer': None, 'teams': [
+                [
+                    {'tag': '#8LQYG90YG', 'name': 'LilDylute52', 'brawler': {'id': 16000054, 'name': 'FANG', 'power': 11, 'trophies': 15
+                        }
+                    },
+                    {'tag': '#PJ2LJP0G', 'name': 'H A W A I ‘ I', 'brawler': {'id': 16000035, 'name': 'GALE', 'power': 11, 'trophies': 15
+                        }
+                    },
+                    {'tag': '#2GCYG2GRJ', 'name': 'Im inya', 'brawler': {'id': 16000029, 'name': 'BEA', 'power': 11, 'trophies': 15
+                        }
+                    }
+                ],
+                [
+                    {'tag': '#GCCYL9CGR', 'name': 'Chamoy', 'brawler': {'id': 16000008, 'name': 'NITA', 'power': 11, 'trophies': 15
+                        }
+                    },
+                    {'tag': '#R8UUP2PJL', 'name': 'main piper 💤👻', 'brawler': {'id': 16000001, 'name': 'COLT', 'power': 11, 'trophies': 15
+                        }
+                    },
+                    {'tag': '#98U9YU99C', 'name': 'PatheticNerd', 'brawler': {'id': 16000032, 'name': 'MAX', 'power': 11, 'trophies': 15
+                        }
+                    }
+                ]
+            ]
+        }
+    }
+]
