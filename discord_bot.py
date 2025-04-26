@@ -44,7 +44,7 @@ class DiscordBot:
         while True:
             try:
                 if self.message_controller:
-                    self.message_controller.update_battle_logs()
+                    await self.message_controller.update_battle_logs()
             except Exception as e:
                 print(f"Error updating battle logs: {e}")
             await asyncio.sleep(300)  # 5 minutes
