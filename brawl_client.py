@@ -18,7 +18,7 @@ class BrawlClient:
         )
         if response.status_code == 200:
             data = response.json()  # Parse the JSON response
-            return data.get("items", 0)
+            return data
         else:
             return None
 
@@ -34,6 +34,6 @@ class BrawlClient:
         )
         if response.status_code == 200:
             data = response.json()  # Parse the JSON response
-            return data
+            return data.get("items", 0)
         else:
             return response.status_code
