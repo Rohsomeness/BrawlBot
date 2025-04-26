@@ -205,7 +205,7 @@ class MessageController:
         return
 
     async def update_battle_logs(self) -> None:
-        for name, battle_map in self.player_battle_map:
+        for name, battle_map in self.player_battle_map.items():
             game_log = self.brawl_client.get_player_battle_logs(self.player_map[name])
             if isinstance(game_log, int):
                 await self.send_message(f"Error {game_log} with brawl API for updating battle logs, try sending message again")
