@@ -47,7 +47,7 @@ class DiscordBot:
                     await self.message_controller.update_battle_logs()
             except Exception as e:
                 print(f"Error updating battle logs: {e}")
-            await asyncio.sleep(300)  # 5 minutes
+            await asyncio.sleep(120)  # 2 minutes
 
     async def on_message(self, message: discord.Message):
         """Called when a message is sent in a channel the bot has access to."""
