@@ -221,7 +221,7 @@ class MessageController:
                 battle_map["battle_start_times"].add(game_info["battleTime"])
                 if game_info["battle"]["starPlayer"]["tag"] == self.player_map[name]:
                     battle_map["star_players"] += 1
-                if game_info["battle"]["trophyChange"] != 0:
+                if game_info["battle"].get("trophyChange", 0) != 0:
                     battle_map["game_durations_s"] += game_info["battle"]["duration"]
                 if game_info["battle"]["result"] == "victory":
                     battle_map["victories"] += 1
