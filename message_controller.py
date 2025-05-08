@@ -273,7 +273,7 @@ class MessageController:
         msg += "===== Battle Stats =====\n"
         await self.update_battle_logs()
         for player, battle_map in self.player_battle_map.items():
-            msg += f"{player}:\n"
+            msg += f"**{player}**:\n"
             if battle_map["game_durations_s"] == 0:
                 continue
             msg += f"\tGames: {len(battle_map['battle_start_times'])}\n"
@@ -291,7 +291,7 @@ class MessageController:
                 2,
             )
             msg += (
-                f"{player}: Total: {trophy_gain}, "
+                f"**{player}**: Total: {trophy_gain}, "
                 f"TPH: {trophy_per_hour}\n"
             )
             for brawler_num in range(len(end_player_info["brawlers"])):
@@ -308,7 +308,7 @@ class MessageController:
         msg += "===== Battle Stats =====\n"
         await self.update_battle_logs()
         for player, battle_map in self.player_battle_map.items():
-            msg += f"{player}:\n"
+            msg += f"**{player}**:\n"
             if battle_map["game_durations_s"] == 0:
                 continue
             msg += f"\tGames: {len(battle_map['battle_start_times'])}\n"
@@ -326,7 +326,7 @@ class MessageController:
                 2,
             )
             msg += (
-                f"{player}: Total: {trophy_gain}, "
+                f"**{player}**: Total: {trophy_gain}, "
                 f"TPH: {trophy_per_hour}\n"
             )
             for brawler_num in range(len(end_player_info["brawlers"])):
