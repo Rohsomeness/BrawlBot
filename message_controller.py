@@ -120,11 +120,33 @@ class MessageController:
         self.start_time = datetime.datetime.now(tz=datetime.timezone.utc)
 
     async def berate_player(self, player_name, consecutive_victories, consecutive_losses):
-        if (consecutive_victories > 0) and (consecutive_victories % 5 == 0):
-            await self.send_message(f"{player_name} is popping off, {consecutive_victories} wins in a row!")
+        if consecutive_victories >= 5:
+            congratulations_messages = [
+                f"{player_name} is popping off, {consecutive_victories} wins in a row!",
+                f"{player_name} just nutted on the randoms {consecutive_victories} times in a row!",
+                f"{player_name} clapped cheeks {consecutive_victories} games straight — call that a hot streak!",
+                f"{player_name} went full sweat mode and dommed {consecutive_victories} matches!",
+                f"{player_name} raw-dogged the enemy team {consecutive_victories} times — zero protection!",
+                f"{player_name} served {consecutive_victories} rounds of certified gamer pipe!",
+                f"{player_name} smashed {consecutive_victories} teams so hard they’re filing a complaint!",
+                f"{player_name} left no lube, no mercy — {consecutive_victories} straight wins!",
+                f"{player_name} just turned {consecutive_victories} lobbies into their personal OnlyFans content!",
+                f"{player_name} laid down the pipe {consecutive_victories} times like a horny builder in Power League!",
+                f"{player_name} just raw-fucked {consecutive_victories} teams in a row—no lube, no mercy.",
+                f"{player_name} nutted on the enemy spawn {consecutive_victories} times. The cleanup crew’s on strike.",
+                f"{player_name} piped {consecutive_victories*3} randoms so hard they’re questioning their mains.",
+                f"{player_name} went full step-bro mode and dominated {consecutive_victories} lobbies—someone call the algorithm.",
+                f"{player_name} had {consecutive_victories} straight wins and somehow got every enemy pregnant. Wipe up.",
+                f"{player_name} violated {consecutive_victories} squads like a Terms of Service agreement.",
+                f"{player_name} dropped {consecutive_victories} wins harder than OnlyFans leaks on Twitter.",
+                f"{player_name} has been bending teams over {consecutive_victories} times in a row. At this point it’s a kink.",
+                f"{player_name} made {consecutive_victories} matches look like casting couch auditions.",
+            ]
+            await self.send_message(random.choice(congratulations_messages))
             return
-        if consecutive_losses > 3:
+        if consecutive_losses >= 3:
             roast_messages = [
+                f"{player_name} just gave {consecutive_losses} teams the full Gawk Gawk 9000 with the gamer grip.",
                 f"Yo {player_name} you are cheeks bro",
                 f"{player_name} try to win a game challenge, impossible",
                 f"Yo hop off {player_name}, today is not ur day",
@@ -193,13 +215,21 @@ class MessageController:
                 f"{player_name} playing like they're on airplane mode",
                 f"{player_name} has lost {consecutive_losses} games straight. This might be a world record",
                 f"{player_name} losing 1v1s to NPCs programmed to lose",
-                f"Put {player_name}'s gameplay on National Geographic",
                 f"{player_name} needs a Rosetta Stone for basic mechanics",
                 f"{player_name} pressing random buttons like it's Guitar Hero",
-                f"{player_name} fell off harder than Vine",
                 f"{player_name} looking like the practice bot rn",
                 f"Yo {player_name} have you considered dodging?",
                 f"Bro {player_name} sit this next one out, {consecutive_losses} consecutive losses is crazy work",
+                f"{player_name} just got dicked down {consecutive_losses} times in a row—no reacharound, no respawn.",
+                f"{player_name} took {consecutive_losses} Ls back-to-back like they’re addicted to getting rawed.",
+                f"{player_name} been bent over {consecutive_losses} times straight—someone hand 'em a towel and a therapist.",
+                f"{player_name} got smashed harder than a Piper main in the wrong bush—{consecutive_losses} times!",
+                f"{player_name} been used {consecutive_losses} times like a low-rank Tara in the back of a club.",
+                f"{player_name} taking more punishment than a ball gagged Colt in overtime—{consecutive_losses} Ls deep.",
+                f"{player_name} just gave up {consecutive_losses} wins like a Bibi at a frat party—wide open and no aim.",
+                f"{player_name} been getting clapped so hard, {consecutive_losses} teams owe them child support.",
+                f"{player_name} lost {consecutive_losses} games in a row—at this point it’s not matchmaking, it’s a gangbang.",
+                f"{player_name} just got run through {consecutive_losses} times like a Tinder hookup in a Wi-Fi dead zone.",
             ]
             await self.send_message(random.choice(roast_messages))
         return
