@@ -39,8 +39,8 @@ class MessageController:
             f"!{self.name} remove <player_name>": "remove a player from storage",
             f"!{self.name} grind": "start tracking all added players",
             f"!{self.name} start <player names separated by spaces>": "start tracking all added players",
-            f"!{self.name} progress": "show temporary progress of players",
-            f"!{self.name} end": "end tracking and show stats",
+            f"!{self.name} progress / edge": "show temporary progress of players",
+            f"!{self.name} end / cum": "end tracking and show stats",
             f"!{self.name} reset": "empty all currently tracked players",
             "!debug": "show full status of bot",
         }
@@ -362,10 +362,10 @@ class MessageController:
                     return
                 else:
                     await self._start_tracking(action.split("start ")[-1])
-            elif "progress" in action:
+            elif "progress" in action or "edge" in action:
                 await self._show_progress()
                 return
-            elif "end" in action:
+            elif "end" in action or "cum" in action:
                 if len(self.players_to_track) == 0:
                     await self.send_message("Currently not tracking any players")
                     return
