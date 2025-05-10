@@ -3,8 +3,9 @@ import datetime
 import os
 import pickle
 import random
-from discord import TextChannel
+from discord import File, TextChannel
 from brawl_client import BrawlClient
+from matplotlib import pyplot as plt
 
 
 class MessageController:
@@ -21,6 +22,7 @@ class MessageController:
         self.brawl_client = BrawlClient()
         self.target_channel = target_channel
         self.start_time = None
+        self.version = "1.0.0"
 
     async def send_message(self, msg: str) -> None:
         """Send message to Discord server"""
@@ -28,6 +30,14 @@ class MessageController:
             raise ValueError("Target channel is not set.")
         print(msg)
         await self.target_channel.send(msg)
+
+    async def send_file(self, file_path: str) -> None:
+        """Send a file to Discord server"""
+        if not self.target_channel:
+            raise ValueError("Target channel is not set.")
+        print(file_path)
+        with open(file_path, 'rb') as f:
+            await self.target_channel.send(file=File(f))
 
     async def _send_help_message(self) -> None:
         """Send help message"""
@@ -52,8 +62,9 @@ class MessageController:
     async def _send_status_message(self) -> None:
         """Send status message of bot"""
         status_msg = f"Bot name: {self.name}\n"
+        status_msg += f"Version: {self.version}\n"
         status_msg += "Tracked players:\n"
-        for player, _ in self.players_to_track:
+        for player in self.players_to_track:
             status_msg += f"\t{player}\n"
 
         await self.send_message(status_msg)
@@ -135,11 +146,11 @@ class MessageController:
                 f"{player_name} just raw-fucked {consecutive_victories} teams in a row—no lube, no mercy.",
                 f"{player_name} nutted on the enemy spawn {consecutive_victories} times. The cleanup crew’s on strike.",
                 f"{player_name} piped {consecutive_victories*3} randoms so hard they’re questioning their mains.",
-                f"{player_name} went full step-bro mode and dominated {consecutive_victories} lobbies—someone call the algorithm.",
+                f"{player_name} went full step-bro mode and dominated {consecutive_victories} lobbies.",
                 f"{player_name} had {consecutive_victories} straight wins and somehow got every enemy pregnant. Wipe up.",
                 f"{player_name} violated {consecutive_victories} squads like a Terms of Service agreement.",
                 f"{player_name} dropped {consecutive_victories} wins harder than OnlyFans leaks on Twitter.",
-                f"{player_name} has been bending teams over {consecutive_victories} times in a row. At this point it’s a kink.",
+                f"{player_name} has been bending teams over {consecutive_victories} times in a row. At this point it’s a kink",
                 f"{player_name} made {consecutive_victories} matches look like casting couch auditions.",
             ]
             await self.send_message(random.choice(congratulations_messages))
@@ -267,6 +278,78 @@ class MessageController:
                     battle_map["consecutive_losses"],
                 )
 
+    async def _send_progress_graph(self) -> None:
+        """Send progress graph for trophies over time
+        """
+        plt.figure()
+        plt.title("Total Trophies Over Time")
+        plt.xlabel("Time")
+        plt.ylabel("Trophies")
+
+        for name in self.players_to_track:
+            game_log = self.brawl_client.get_player_battle_logs(self.player_map[name])
+            times = [self.start_time]
+            trophies = [self.players_to_track[name]["trophies"]]
+            if isinstance(game_log, int):
+                await self.send_message(f"Error {game_log} with brawl API for updating battle logs, try sending message again")
+                return
+
+            for game_info in game_log:
+                battle_time = datetime.datetime.strptime(
+                    game_info["battleTime"], "%Y%m%dT%H%M%S.000Z"
+                ).replace(tzinfo=datetime.timezone.utc)
+                if battle_time < self.start_time:
+                    continue
+                times.append(battle_time)
+                trophies.append(trophies[-1] + game_info["battle"].get("trophyChange", 0))
+
+            if len(times) == 1:
+                continue
+            times.append(datetime.datetime.now(datetime.timezone.utc))
+            trophies.append(trophies[-1])
+            plt.plot(times, trophies, label=name)
+        plt.xticks(rotation=45, ha='right')
+        plt.legend()
+        plt.subplots_adjust(bottom=0.2)
+        filename = "trophy_plot.png"
+        plt.savefig(filename)
+        await self.send_file(filename)
+
+    async def _send_trophy_delta_graph(self) -> None:
+        """Send progress graph for trophies over time
+        """
+        plt.figure()
+        plt.title("Trophies Delta Over Time")
+        plt.xlabel("Time")
+        plt.ylabel("Trophies")
+
+        for name in self.players_to_track:
+            game_log = self.brawl_client.get_player_battle_logs(self.player_map[name])
+            times = [self.start_time]
+            trophies = [0]
+            if isinstance(game_log, int):
+                await self.send_message(f"Error {game_log} with brawl API for updating battle logs, try sending message again")
+                return
+
+            for game_info in sorted(game_log, key=lambda x: x["battleTime"]):
+                battle_time = datetime.datetime.strptime(
+                    game_info["battleTime"], "%Y%m%dT%H%M%S.000Z"
+                ).replace(tzinfo=datetime.timezone.utc)
+                if battle_time < self.start_time:
+                    continue
+                times.append(battle_time)
+                trophies.append(trophies[-1] + game_info["battle"].get("trophyChange", 0))
+
+            times.append(datetime.datetime.now(datetime.timezone.utc))
+            trophies.append(trophies[-1])
+            plt.plot(times, trophies, label=name)
+        plt.xticks(rotation=45, ha='right')
+        plt.legend()
+        plt.subplots_adjust(bottom=0.2)
+        filename = "trophy_delta_plot.png"
+        plt.savefig(filename)
+        await self.send_file(filename)
+
     async def _show_progress(self):
         """Show intermediate progresss"""
         msg = "Progress\n"
@@ -301,11 +384,13 @@ class MessageController:
                     brawler_name = end_player_info["brawlers"][brawler_num]["name"]
                     msg += f"\t{brawler_name}: {end_trophies - start_trophies}\n"
         await self.send_message(msg)
+        await self._send_trophy_delta_graph()
 
     async def _end_tracking(self):
         """End tracking of players"""
         msg = "Ended Tracking\n"
         msg += "===== Battle Stats =====\n"
+        most_star_players = ("nobody", 0)
         await self.update_battle_logs()
         for player, battle_map in self.player_battle_map.items():
             msg += f"**{player}**:\n"
@@ -316,6 +401,8 @@ class MessageController:
             msg += f"\tDefeats: {battle_map['defeats']}\n"
             msg += f"\tStar Players: {battle_map['star_players']}\n"
             msg += f"\tGame Time: {battle_map['game_durations_s']}\n"
+            if battle_map["star_players"] > most_star_players[1]:
+                most_star_players = (player, battle_map["star_players"])
 
         msg += "===== Trophy Gains =====\n"
         for player, start_player_info in self.players_to_track.items():
@@ -335,10 +422,15 @@ class MessageController:
                 if end_trophies != start_trophies:
                     brawler_name = end_player_info["brawlers"][brawler_num]["name"]
                     msg += f"\t{brawler_name}: {end_trophies - start_trophies}\n"
+        await self.send_message(msg)
+        await self._send_trophy_delta_graph()
+        await self._send_progress_graph()
+        await self.send_message(
+            f"Congrats to {most_star_players[0]} for carrying the session with {most_star_players[1]} star players!"
+        )
         self.players_to_track = {}
         self.start_time = None
         self.player_battle_map = {}
-        await self.send_message(msg)
 
     def _validate_message(self, msg: str) -> bool:
         """Some basic validation on messages before analyzing"""
@@ -393,6 +485,9 @@ class MessageController:
                 else:
                     await self._start_tracking(action.split("start ")[-1])
             elif "progress" in action or "edge" in action:
+                if len(self.players_to_track) == 0:
+                    await self.send_message("Currently not tracking any players")
+                    return
                 await self._show_progress()
                 return
             elif "end" in action or "cum" in action:
