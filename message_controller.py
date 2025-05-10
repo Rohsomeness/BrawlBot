@@ -22,7 +22,7 @@ class MessageController:
         self.brawl_client = BrawlClient()
         self.target_channel = target_channel
         self.start_time = None
-        self.version = "1.0.0"
+        self.version = "1.0.1"
 
     async def send_message(self, msg: str) -> None:
         """Send message to Discord server"""
@@ -294,7 +294,7 @@ class MessageController:
                 await self.send_message(f"Error {game_log} with brawl API for updating battle logs, try sending message again")
                 return
 
-            for game_info in game_log:
+            for game_info in sorted(game_log, key=lambda x: x["battleTime"]):
                 battle_time = datetime.datetime.strptime(
                     game_info["battleTime"], "%Y%m%dT%H%M%S.000Z"
                 ).replace(tzinfo=datetime.timezone.utc)
