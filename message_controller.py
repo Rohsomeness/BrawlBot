@@ -22,7 +22,7 @@ class MessageController:
         self.brawl_client = BrawlClient()
         self.target_channel = target_channel
         self.start_time = None
-        self.version = "1.0.1"
+        self.version = "1.1.0"
 
     async def send_message(self, msg: str) -> None:
         """Send message to Discord server"""
@@ -290,6 +290,7 @@ class MessageController:
             game_log = self.brawl_client.get_player_battle_logs(self.player_map[name])
             times = [self.start_time]
             trophies = [self.players_to_track[name]["trophies"]]
+            star_players = [False]
             if isinstance(game_log, int):
                 await self.send_message(f"Error {game_log} with brawl API for updating battle logs, try sending message again")
                 return
@@ -302,12 +303,14 @@ class MessageController:
                     continue
                 times.append(battle_time)
                 trophies.append(trophies[-1] + game_info["battle"].get("trophyChange", 0))
+                star_players.append(game_info["battle"]["starPlayer"]["tag"] == self.player_map[name])
 
             if len(times) == 1:
                 continue
             times.append(datetime.datetime.now(datetime.timezone.utc))
             trophies.append(trophies[-1])
-            plt.plot(times, trophies, label=name)
+            star_players.append(False)
+            plt.plot(times, trophies, marker="*", markevery=star_players, label=name)
         plt.xticks(rotation=45, ha='right')
         plt.legend()
         plt.subplots_adjust(bottom=0.2)
@@ -327,6 +330,7 @@ class MessageController:
             game_log = self.brawl_client.get_player_battle_logs(self.player_map[name])
             times = [self.start_time]
             trophies = [0]
+            star_players = [False]
             if isinstance(game_log, int):
                 await self.send_message(f"Error {game_log} with brawl API for updating battle logs, try sending message again")
                 return
@@ -339,10 +343,12 @@ class MessageController:
                     continue
                 times.append(battle_time)
                 trophies.append(trophies[-1] + game_info["battle"].get("trophyChange", 0))
+                star_players.append(game_info["battle"]["starPlayer"]["tag"] == self.player_map[name])
 
             times.append(datetime.datetime.now(datetime.timezone.utc))
             trophies.append(trophies[-1])
-            plt.plot(times, trophies, label=name)
+            star_players.append(False)
+            plt.plot(times, trophies, marker="*", markevery=star_players, label=name)
         plt.xticks(rotation=45, ha='right')
         plt.legend()
         plt.subplots_adjust(bottom=0.2)
