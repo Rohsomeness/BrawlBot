@@ -22,7 +22,7 @@ class MessageController:
         self.brawl_client = BrawlClient()
         self.target_channel = target_channel
         self.start_time = None
-        self.version = "1.1.0"
+        self.version = "1.1.1"
 
     async def send_message(self, msg: str) -> None:
         """Send message to Discord server"""
@@ -384,11 +384,14 @@ class MessageController:
                 f"TPH: {trophy_per_hour}\n"
             )
             for brawler_num in range(len(end_player_info["brawlers"])):
-                start_trophies = start_player_info["brawlers"][brawler_num]["trophies"]
-                end_trophies = end_player_info["brawlers"][brawler_num]["trophies"]
-                if end_trophies != start_trophies:
-                    brawler_name = end_player_info["brawlers"][brawler_num]["name"]
-                    msg += f"\t{brawler_name}: {end_trophies - start_trophies}\n"
+                try:
+                    start_trophies = start_player_info["brawlers"][brawler_num]["trophies"]
+                    end_trophies = end_player_info["brawlers"][brawler_num]["trophies"]
+                    if end_trophies != start_trophies:
+                        brawler_name = end_player_info["brawlers"][brawler_num]["name"]
+                        msg += f"\t{brawler_name}: {end_trophies - start_trophies}\n"
+                except IndexError:
+                    continue
         await self.send_message(msg)
         await self._send_trophy_delta_graph()
 
@@ -423,11 +426,14 @@ class MessageController:
                 f"TPH: {trophy_per_hour}\n"
             )
             for brawler_num in range(len(end_player_info["brawlers"])):
-                start_trophies = start_player_info["brawlers"][brawler_num]["trophies"]
-                end_trophies = end_player_info["brawlers"][brawler_num]["trophies"]
-                if end_trophies != start_trophies:
-                    brawler_name = end_player_info["brawlers"][brawler_num]["name"]
-                    msg += f"\t{brawler_name}: {end_trophies - start_trophies}\n"
+                try:
+                    start_trophies = start_player_info["brawlers"][brawler_num]["trophies"]
+                    end_trophies = end_player_info["brawlers"][brawler_num]["trophies"]
+                    if end_trophies != start_trophies:
+                        brawler_name = end_player_info["brawlers"][brawler_num]["name"]
+                        msg += f"\t{brawler_name}: {end_trophies - start_trophies}\n"
+                except IndexError:
+                    continue
         await self.send_message(msg)
         await self._send_trophy_delta_graph()
         await self._send_progress_graph()
