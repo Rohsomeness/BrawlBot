@@ -22,7 +22,8 @@ class MessageController:
         self.brawl_client = BrawlClient()
         self.target_channel = target_channel
         self.start_time = None
-        self.version = "1.1.1"
+        self.version = "1.1.2"
+        self.send_message(f"Brawl bot redeployed, version {self.version}")
 
     async def send_message(self, msg: str) -> None:
         """Send message to Discord server"""
@@ -260,7 +261,7 @@ class MessageController:
                 if game_info["battleTime"] in battle_map["battle_start_times"]:
                     continue
                 battle_map["battle_start_times"].add(game_info["battleTime"])
-                if game_info["battle"]["starPlayer"]["tag"] == self.player_map[name]:
+                if game_info["battle"].get("starPlayer", {}).get("tag") == self.player_map[name]:
                     battle_map["star_players"] += 1
                 if game_info["battle"].get("trophyChange", 0) != 0:
                     battle_map["game_durations_s"] += game_info["battle"]["duration"]
@@ -303,7 +304,7 @@ class MessageController:
                     continue
                 times.append(battle_time)
                 trophies.append(trophies[-1] + game_info["battle"].get("trophyChange", 0))
-                star_players.append(game_info["battle"]["starPlayer"]["tag"] == self.player_map[name])
+                star_players.append(game_info["battle"].get("starPlayer", {}).get("tag") == self.player_map[name])
 
             if len(times) == 1:
                 continue
@@ -343,7 +344,7 @@ class MessageController:
                     continue
                 times.append(battle_time)
                 trophies.append(trophies[-1] + game_info["battle"].get("trophyChange", 0))
-                star_players.append(game_info["battle"]["starPlayer"]["tag"] == self.player_map[name])
+                star_players.append(game_info["battle"].get("starPlayer", {}).get("tag") == self.player_map[name])
 
             times.append(datetime.datetime.now(datetime.timezone.utc))
             trophies.append(trophies[-1])
