@@ -35,6 +35,10 @@ class DiscordBot:
             self.message_controller.load_state()
             print("MessageController is ready")
 
+            await self.message_controller.send_message(
+                f"Brawl bot redeployed, version {self.message_controller.version}"
+            )
+
             self.client.loop.create_task(self.update_battle_logs_periodically())
         else:
             print(f"Could not find channel with ID {self.channel_id}")

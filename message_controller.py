@@ -23,7 +23,6 @@ class MessageController:
         self.target_channel = target_channel
         self.start_time = None
         self.version = "1.1.2"
-        self.send_message(f"Brawl bot redeployed, version {self.version}")
 
     async def send_message(self, msg: str) -> None:
         """Send message to Discord server"""
