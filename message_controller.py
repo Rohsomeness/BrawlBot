@@ -14,15 +14,19 @@ class MessageController:
         self.message_char_len_limit = 100
         self.name = "brawlbot"
         self.available_commands = [
-            "!help", "!setname", "!status", "!debug", "start", "add", "end"
+            "!help", "!setname", "!status", "!debug", "start", "add", "end",
+            "grind", "progress", "edge", "reset", "stats", "leaderboard", "milestones"
         ]
         self.players_to_track: dict[str, dict] = {}
         self.player_map: dict[str, str] = {}
+        self.player_stats: dict[str, dict] = {}
         self.player_battle_map: dict[str, dict] = {}
         self.brawl_client = BrawlClient()
         self.target_channel = target_channel
         self.start_time = None
-        self.version = "1.1.2"
+        self.last_activity_time = None
+        self.auto_end_timeout = datetime.timedelta(minutes=10)
+        self.version = "2.0.0"
 
     async def send_message(self, msg: str) -> None:
         """Send message to Discord server"""
@@ -47,11 +51,14 @@ class MessageController:
             f"!{self.name} status": "show status of bot",
             f"!{self.name} add <player_name> <brawlstars_tag>": "add a player to storage",
             f"!{self.name} remove <player_name>": "remove a player from storage",
-            f"!{self.name} grind": "start tracking all added players",
-            f"!{self.name} start <player names separated by spaces>": "start tracking all added players",
+            f"!{self.name} grind": "start tracking all registered players",
+            f"!{self.name} start <player names separated by spaces>": "start tracking selected players",
             f"!{self.name} progress / edge": "show temporary progress of players",
             f"!{self.name} end / cum": "end tracking and show stats",
             f"!{self.name} reset": "empty all currently tracked players",
+            f"!{self.name} stats <player_name>": "show persistent totals for a player",
+            f"!{self.name} leaderboard": "show persistent total leaderboard",
+            f"!{self.name} milestones": "show milestone progress for registered players",
             "!debug": "show full status of bot",
         }
         help_msg = "List of available commands: \n"
@@ -63,6 +70,8 @@ class MessageController:
         """Send status message of bot"""
         status_msg = f"Bot name: {self.name}\n"
         status_msg += f"Version: {self.version}\n"
+        status_msg += f"Registered players: {len(self.player_map)}\n"
+        status_msg += f"Session active: {'Yes' if self.start_time else 'No'}\n"
         status_msg += "Tracked players:\n"
         for player in self.players_to_track:
             status_msg += f"\t{player}\n"
@@ -84,10 +93,20 @@ class MessageController:
         await self.send_message(registered_players_msg)
 
     async def _add_player(self, player_name: str, player_tag: str):
-        if self.brawl_client.get_player_info(player_tag) is None:
+        player_info = self.brawl_client.get_player_info(player_tag)
+        if player_info is None:
             await self.send_message(f"Unable to find player tag {player_tag}")
             return
         self.player_map[player_name] = player_tag
+        self.player_stats.setdefault(player_name, {
+            "tag": player_tag,
+            "total_trophies_climbed": 0,
+            "total_star_players": 0,
+            "total_wins": 0,
+            "total_defeats": 0,
+            "brawler_milestones": {},
+            "last_trophies": player_info["trophies"],
+        })
         await self.send_message(f"Added player {player_name} with player tag {player_tag}")
 
     async def _remove_player(self, player_name: str):
@@ -95,6 +114,8 @@ class MessageController:
             del self.player_map[player_name]
             if player_name in self.players_to_track:
                 del self.players_to_track[player_name]
+            if player_name in self.player_stats:
+                del self.player_stats[player_name]
             await self.send_message(f"Player {player_name} removed")
         else:
             await self.send_message(f"Could not find player {player_name} to remove")
@@ -129,6 +150,79 @@ class MessageController:
             start_tracking_msg += f"\tName: {name}, Start Trophies: {player_info['trophies']}\n"
         await self.send_message(start_tracking_msg)
         self.start_time = datetime.datetime.now(tz=datetime.timezone.utc)
+        self.last_activity_time = self.start_time
+
+    async def _auto_start_session(self):
+        if self.start_time is not None or not self.player_map:
+            return
+        names_to_track = []
+        for name, tag in self.player_map.items():
+            player_info = self.brawl_client.get_player_info(tag)
+            if player_info is None:
+                continue
+            last_trophies = self.player_stats.get(name, {}).get("last_trophies")
+            if last_trophies is None or player_info["trophies"] != last_trophies:
+                names_to_track.append(name)
+                self.player_stats.setdefault(name, {}).update({
+                    "tag": tag,
+                    "last_trophies": player_info["trophies"],
+                })
+        if names_to_track:
+            await self._start_tracking(" ".join(names_to_track))
+            await self.send_message("Auto-started a new tracking session based on recent player activity.")
+
+    async def _auto_end_session(self):
+        if self.start_time is None or self.last_activity_time is None:
+            return
+        if datetime.datetime.now(tz=datetime.timezone.utc) - self.last_activity_time > self.auto_end_timeout:
+            await self._end_tracking()
+
+    def _milestones_for_trophies(self, trophies):
+        thresholds = [250, 500, 750, 1000]
+        return [threshold for threshold in thresholds if trophies >= threshold]
+
+    async def _check_milestones(self, name, player_info):
+        stats = self.player_stats.setdefault(name, {
+            "tag": self.player_map.get(name, ""),
+            "total_trophies_climbed": 0,
+            "total_star_players": 0,
+            "total_wins": 0,
+            "total_defeats": 0,
+            "brawler_milestones": {},
+            "last_trophies": player_info.get("trophies", 0),
+        })
+        for brawler in player_info.get("brawlers", []):
+            brawler_name = brawler.get("name")
+            if not brawler_name:
+                continue
+            current_thresholds = self._milestones_for_trophies(brawler.get("trophies", 0))
+            previous_thresholds = set(stats["brawler_milestones"].get(brawler_name, []))
+            new_thresholds = set(current_thresholds) - previous_thresholds
+            if new_thresholds:
+                for milestone in sorted(new_thresholds):
+                    await self.send_message(
+                        f"{name} just hit a milestone with {brawler_name}: {milestone} trophies!"
+                    )
+                stats["brawler_milestones"][brawler_name] = sorted(previous_thresholds.union(current_thresholds))
+
+    async def _send_session_outcome_graph(self) -> None:
+        plt.figure()
+        plt.title("Session Outcomes")
+        plt.xlabel("Player")
+        plt.ylabel("Games")
+        labels = list(self.player_battle_map.keys())
+        wins = [self.player_battle_map[name]["victories"] for name in labels]
+        defeats = [self.player_battle_map[name]["defeats"] for name in labels]
+        x = range(len(labels))
+        bar_width = 0.35
+        plt.bar([xi - bar_width / 2 for xi in x], wins, width=bar_width, label="Wins", color="#4CAF50")
+        plt.bar([xi + bar_width / 2 for xi in x], defeats, width=bar_width, label="Defeats", color="#F44336")
+        plt.xticks(list(x), labels, rotation=45, ha='right')
+        plt.legend()
+        plt.subplots_adjust(bottom=0.2)
+        filename = "session_outcomes.png"
+        plt.savefig(filename)
+        await self.send_file(filename)
 
     async def berate_player(self, player_name, consecutive_victories, consecutive_losses):
         if consecutive_victories >= 5:
@@ -246,6 +340,14 @@ class MessageController:
         return
 
     async def update_battle_logs(self) -> None:
+        if self.start_time is None:
+            await self._auto_start_session()
+        if self.start_time is None:
+            return
+
+        any_activity = False
+        now = datetime.datetime.now(tz=datetime.timezone.utc)
+
         for name, battle_map in self.player_battle_map.items():
             game_log = self.brawl_client.get_player_battle_logs(self.player_map[name])
             if isinstance(game_log, int):
@@ -253,30 +355,50 @@ class MessageController:
                 return
 
             for game_info in game_log:
-                if datetime.datetime.strptime(
+                battle_time = datetime.datetime.strptime(
                     game_info["battleTime"], "%Y%m%dT%H%M%S.000Z"
-                ).replace(tzinfo=datetime.timezone.utc) < self.start_time:
+                ).replace(tzinfo=datetime.timezone.utc)
+                if battle_time < self.start_time:
                     continue
                 if game_info["battleTime"] in battle_map["battle_start_times"]:
                     continue
+
+                any_activity = True
                 battle_map["battle_start_times"].add(game_info["battleTime"])
                 if game_info["battle"].get("starPlayer", {}).get("tag") == self.player_map[name]:
                     battle_map["star_players"] += 1
+                    self.player_stats.setdefault(name, {}).setdefault("total_star_players", 0)
+                    self.player_stats[name]["total_star_players"] += 1
+                trophy_change = game_info["battle"].get("trophyChange", 0)
+                if trophy_change > 0:
+                    self.player_stats.setdefault(name, {}).setdefault("total_trophies_climbed", 0)
+                    self.player_stats[name]["total_trophies_climbed"] += trophy_change
                 if game_info["battle"].get("trophyChange", 0) != 0:
                     battle_map["game_durations_s"] += game_info["battle"]["duration"]
                 if game_info["battle"]["result"] == "victory":
                     battle_map["victories"] += 1
                     battle_map["consecutive_victories"] += 1
                     battle_map["consecutive_losses"] = 0
+                    self.player_stats.setdefault(name, {}).setdefault("total_wins", 0)
+                    self.player_stats[name]["total_wins"] += 1
                 elif game_info["battle"]["result"] == "defeat":
                     battle_map["defeats"] += 1
                     battle_map["consecutive_victories"] = 0
                     battle_map["consecutive_losses"] += 1
+                    self.player_stats.setdefault(name, {}).setdefault("total_defeats", 0)
+                    self.player_stats[name]["total_defeats"] += 1
+
                 await self.berate_player(
                     name,
                     battle_map["consecutive_victories"],
                     battle_map["consecutive_losses"],
                 )
+
+        if any_activity:
+            self.last_activity_time = now
+            self.save_state()
+
+        await self._auto_end_session()
 
     async def _send_progress_graph(self) -> None:
         """Send progress graph for trophies over time
@@ -356,6 +478,75 @@ class MessageController:
         plt.savefig(filename)
         await self.send_file(filename)
 
+    async def _send_stats_message(self, player_name: str = None) -> None:
+        if player_name:
+            stats = self.player_stats.get(player_name)
+            if not stats:
+                await self.send_message(f"No stats available for {player_name}")
+                return
+            msg = f"Stats for {player_name}:\n"
+            msg += f"\tTotal trophies climbed: {stats.get('total_trophies_climbed', 0)}\n"
+            msg += f"\tTotal star players: {stats.get('total_star_players', 0)}\n"
+            msg += f"\tTotal wins: {stats.get('total_wins', 0)}\n"
+            msg += f"\tTotal defeats: {stats.get('total_defeats', 0)}\n"
+            await self.send_message(msg)
+            return
+
+        msg = "Persistent player stats:\n"
+        if not self.player_stats:
+            msg += "\tNo players registered yet."
+            await self.send_message(msg)
+            return
+        for name, stats in self.player_stats.items():
+            msg += f"**{name}**: trophies climbed={stats.get('total_trophies_climbed', 0)}, "
+            msg += f"star players={stats.get('total_star_players', 0)}, "
+            msg += f"wins={stats.get('total_wins', 0)}, defeats={stats.get('total_defeats', 0)}\n"
+        await self.send_message(msg)
+
+    async def _send_leaderboard(self) -> None:
+        if not self.player_stats:
+            await self.send_message("No leaderboard available until players earn progress.")
+            return
+        leaderboard = sorted(
+            self.player_stats.items(),
+            key=lambda item: (
+                item[1].get("total_trophies_climbed", 0),
+                item[1].get("total_star_players", 0),
+                item[1].get("total_wins", 0),
+            ),
+            reverse=True,
+        )
+        msg = "Leaderboard by trophies climbed:\n"
+        for idx, (name, stats) in enumerate(leaderboard, start=1):
+            msg += (
+                f"{idx}. {name}: trophies climbed={stats.get('total_trophies_climbed', 0)}, "
+                f"star players={stats.get('total_star_players', 0)}, "
+                f"wins={stats.get('total_wins', 0)}\n"
+            )
+        await self.send_message(msg)
+
+    async def _send_milestones(self) -> None:
+        if not self.player_stats:
+            await self.send_message("No milestone progress available yet.")
+            return
+        msg = "Milestone progress by player:\n"
+        for name, stats in self.player_stats.items():
+            msg += f"**{name}**:\n"
+            player_info = self.brawl_client.get_player_info(stats.get("tag", ""))
+            if player_info is None:
+                msg += "\tUnable to load player data.\n"
+                continue
+            await self._check_milestones(name, player_info)
+            for brawler in player_info.get("brawlers", []):
+                brawler_name = brawler.get("name")
+                trophy_count = brawler.get("trophies", 0)
+                thresholds = self._milestones_for_trophies(trophy_count)
+                if thresholds:
+                    msg += f"\t{brawler_name}: {trophy_count} trophies - milestones {thresholds}\n"
+                else:
+                    msg += f"\t{brawler_name}: {trophy_count} trophies - no milestones yet\n"
+        await self.send_message(msg)
+
     async def _show_progress(self):
         """Show intermediate progresss"""
         msg = "Progress\n"
@@ -394,6 +585,7 @@ class MessageController:
                     continue
         await self.send_message(msg)
         await self._send_trophy_delta_graph()
+        await self._send_session_outcome_graph()
 
     async def _end_tracking(self):
         """End tracking of players"""
@@ -436,13 +628,22 @@ class MessageController:
                     continue
         await self.send_message(msg)
         await self._send_trophy_delta_graph()
+        await self._send_session_outcome_graph()
         await self._send_progress_graph()
         await self.send_message(
             f"Congrats to {most_star_players[0]} for carrying the session with {most_star_players[1]} star players!"
         )
+        for player in self.players_to_track:
+            final_info = self.brawl_client.get_player_info(self.player_map[player])
+            if final_info is not None:
+                self.player_stats.setdefault(player, {}).update({
+                    "last_trophies": final_info.get("trophies", self.player_stats[player].get("last_trophies", 0))
+                })
+                await self._check_milestones(player, final_info)
         self.players_to_track = {}
         self.start_time = None
         self.player_battle_map = {}
+        self.save_state()
 
     def _validate_message(self, msg: str) -> bool:
         """Some basic validation on messages before analyzing"""
@@ -508,6 +709,22 @@ class MessageController:
                     return
                 await self._end_tracking()
 
+            elif "stats" in action:
+                parts = action.split(" ", 2)
+                if len(parts) == 2:
+                    await self._send_stats_message(parts[-1])
+                else:
+                    await self._send_stats_message()
+                return
+
+            elif "leaderboard" in action:
+                await self._send_leaderboard()
+                return
+
+            elif "milestones" in action:
+                await self._send_milestones()
+                return
+
             elif "add" in action:
                 name = action.split(" ", 2)[1]
                 tag = action.split(" ", 2)[-1]
@@ -526,6 +743,7 @@ class MessageController:
         with open(filename, "wb") as file:
             pickle.dump({
                 "player_map": self.player_map,
+                "player_stats": self.player_stats,
                 "name": self.name,
             }, file)
         print(f"State saved to {filename}")
@@ -536,6 +754,7 @@ class MessageController:
             with open(filename, "rb") as file:
                 state = pickle.load(file)
                 self.player_map = state.get("player_map", {})
+                self.player_stats = state.get("player_stats", {})
                 self.name = state.get("name", "brawlbot")
             print(f"State loaded from {filename}")
         else:

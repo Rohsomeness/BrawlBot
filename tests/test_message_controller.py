@@ -16,10 +16,12 @@ class TestMessageController(unittest.TestCase):
         self.assertEqual(self.controller.message_char_len_limit, 100)
         self.assertEqual(self.controller.name, "brawlbot")
         self.assertEqual(self.controller.available_commands, [
-            "!help", "!setname", "!status", "!debug", "start", "add", "end"
+            "!help", "!setname", "!status", "!debug", "start", "add", "end",
+            "grind", "progress", "edge", "reset", "stats", "leaderboard", "milestones"
         ])
         self.assertEqual(self.controller.players_to_track, {})
         self.assertEqual(self.controller.player_map, {})
+        self.assertEqual(self.controller.player_stats, {})
         self.assertEqual(self.controller.target_channel, self.target_channel)
 
     async def test_send_message(self):
@@ -48,6 +50,8 @@ class TestMessageController(unittest.TestCase):
         self.controller.brawl_client.get_player_info.return_value = {"trophies": 100}
         await self.controller._add_player(player_name, player_tag)
         self.assertIn(player_name, self.controller.player_map)
+        self.assertIn(player_name, self.controller.player_stats)
+        self.assertEqual(self.controller.player_stats[player_name]["last_trophies"], 100)
         self.target_channel.send.assert_called_once_with(f"Added player {player_name} with player tag {player_tag}")
 
     async def test_start_tracking(self):
@@ -61,6 +65,7 @@ class TestMessageController(unittest.TestCase):
     @patch("pickle.dump")
     def test_save_state(self, mock_pickle_dump, mock_open_file):
         self.controller.player_map = {"player1": "#12345"}
+        self.controller.player_stats = {"player1": {"last_trophies": 100}}
         self.controller.save_state()
 
         mock_open_file.assert_called_once_with("message_controller_state.pkl", "wb")
@@ -68,6 +73,7 @@ class TestMessageController(unittest.TestCase):
         _, args, _ = mock_pickle_dump.mock_calls[0]
         saved_state = args[0]
         self.assertEqual(saved_state["player_map"], {"player1": "#12345"})
+        self.assertEqual(saved_state["player_stats"], {"player1": {"last_trophies": 100}})
         self.assertEqual(saved_state["name"], "brawlbot")
 
     @patch("builtins.open", new_callable=mock_open, read_data=pickle.dumps({
@@ -79,6 +85,7 @@ class TestMessageController(unittest.TestCase):
     def test_load_state(self, mock_pickle_load, mock_os_path_exists, mock_open_file):
         mock_pickle_load.return_value = {
             "player_map": {"player1": "#12345"},
+            "player_stats": {"player1": {"last_trophies": 100}},
             "name": "brawlbot"
         }
 
@@ -87,6 +94,7 @@ class TestMessageController(unittest.TestCase):
         mock_open_file.assert_called_once_with("message_controller_state.pkl", "rb")
         mock_pickle_load.assert_called_once()
         self.assertEqual(self.controller.player_map, {"player1": "#12345"})
+        self.assertEqual(self.controller.player_stats, {"player1": {"last_trophies": 100}})
         self.assertEqual(self.controller.name, "brawlbot")
 
 
