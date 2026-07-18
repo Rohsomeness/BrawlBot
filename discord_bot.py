@@ -44,7 +44,7 @@ class DiscordBot:
             print(f"Could not find channel with ID {self.channel_id}")
 
     async def update_battle_logs_periodically(self):
-        """Call update_battle_logs every 5 minutes."""
+        """Poll player progress every 2 minutes (milestones + active session battles)."""
         while True:
             try:
                 if self.message_controller:
@@ -57,6 +57,9 @@ class DiscordBot:
         """Called when a message is sent in a channel the bot has access to."""
         if message.author == self.client.user:
             return  # Ignore the bot's own messages
+
+        if self.message_controller is None:
+            return
 
         if message.content.startswith("!"):
             await self.message_controller.process_message(message.content)
