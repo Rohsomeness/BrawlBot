@@ -27,7 +27,7 @@ class TestMessageController(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(self.controller.player_map, {})
         self.assertEqual(self.controller.player_stats, {})
         self.assertEqual(self.controller.target_channel, self.target_channel)
-        self.assertEqual(self.controller.version, "2.1.0")
+        self.assertEqual(self.controller.version, "2.2.0")
 
     async def test_send_message(self):
         msg = "Hello, world!"
@@ -167,6 +167,28 @@ class TestMessageController(unittest.IsolatedAsyncioTestCase):
             [250, 500, 750],
         )
 
+    async def test_milestones_compact(self):
+        self.controller.player_map = {"alice": "#AAA"}
+        self.controller.brawl_client.get_player_info.return_value = {
+            "trophies": 4500,
+            "highestTrophies": 4600,
+            "brawlers": [
+                {"name": "SHELLY", "trophies": 600},
+                {"name": "NITA", "trophies": 200},
+                {"name": "COLT", "trophies": 1000},
+            ],
+        }
+        await self.controller._send_milestones()
+        text = self.target_channel.send.call_args[0][0]
+        self.assertIn("4,500", text)
+        self.assertIn("next 5,000", text)
+        self.assertIn("250+×2", text)  # SHELLY + COLT
+        self.assertIn("500+×2", text)
+        self.assertIn("1000+×1", text)
+        # No per-brawler dump
+        self.assertNotIn("SHELLY:", text)
+        self.assertNotIn("no milestones yet", text)
+
     async def test_monitor_registered_players(self):
         self.controller.player_map = {"alice": "#AAA"}
         self.controller.player_stats = {
@@ -239,6 +261,7 @@ class TestMessageController(unittest.IsolatedAsyncioTestCase):
         self.controller.brawl_client.get_player_info.return_value = {
             "brawlers": [
                 {
+                    "id": 16000000,
                     "name": "SHELLY",
                     "power": 11,
                     "trophies": 600,
@@ -246,7 +269,10 @@ class TestMessageController(unittest.IsolatedAsyncioTestCase):
                     "rank": 25,
                     "gadgets": [{"name": "Fast Forward"}],
                     "starPowers": [{"name": "Shell Shock"}],
-                    "gears": [{"name": "Speed"}],
+                    "gears": [
+                        {"name": "SPEED", "level": 1},
+                        {"name": "HEALTH", "level": 2},
+                    ],
                 },
                 {"name": "NITA", "power": 9, "trophies": 400},
             ]
@@ -259,6 +285,10 @@ class TestMessageController(unittest.IsolatedAsyncioTestCase):
         self.assertIn("600", text)
         self.assertIn("Shell Shock", text)
         self.assertIn("Fast Forward", text)
+        self.assertIn("SPEED (level 1)", text)
+        self.assertIn("HEALTH (level 2)", text)
+        self.assertIn("Gadgets", text)
+        self.assertIn("Gears", text)
 
     async def test_brawler_power_single_player_shorthand(self):
         self.controller.player_map = {"alice": "#AAA"}

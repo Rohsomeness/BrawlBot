@@ -38,7 +38,7 @@ class MessageController:
         self.start_time = None
         self.last_activity_time = None
         self.auto_end_timeout = datetime.timedelta(minutes=10)
-        self.version = "2.1.0"
+        self.version = "2.2.0"
         self._brawler_catalog_cache: Optional[list] = None
         self._ending_session = False
 
@@ -140,11 +140,11 @@ class MessageController:
             f"!{self.name} reset": "empty all currently tracked players",
             f"!{self.name} stats <player_name>": "show persistent totals for a player",
             f"!{self.name} leaderboard": "show persistent total leaderboard",
-            f"!{self.name} milestones": "show milestone progress for registered players",
+            f"!{self.name} milestones": "short trophy milestone summary for registered players",
             f"!{self.name} profile [player_name]": "show player profile + image card",
             f"!{self.name} catalog [brawler]": "browse the brawler catalog",
             f"!{self.name} collection [player_name]": "compare owned brawlers vs catalog",
-            f"!{self.name} power <player_name> <brawler>": "show a player's power level for a brawler",
+            f"!{self.name} power <player_name> <brawler>": "full brawler details (power, trophies, gears, gadgets, star powers)",
             "!debug": "show full status of bot",
         }
         help_msg = "List of available commands: \n"
@@ -729,37 +729,50 @@ class MessageController:
             )
         await self.send_message(msg)
 
+    def _next_total_trophy_milestone(self, trophies: int) -> Optional[int]:
+        if trophies < self.TOTAL_TROPHY_MIN:
+            return self.TOTAL_TROPHY_MIN
+        next_m = ((trophies // self.TOTAL_TROPHY_STEP) + 1) * self.TOTAL_TROPHY_STEP
+        return next_m
+
+    def _brawler_milestone_counts(self, player_info: dict) -> dict[int, int]:
+        """How many owned brawlers have reached each trophy threshold."""
+        counts = {m: 0 for m in self.BRAWLER_MILESTONES}
+        for brawler in player_info.get("brawlers") or []:
+            trophies = int(brawler.get("trophies") or 0)
+            for threshold in self.BRAWLER_MILESTONES:
+                if trophies >= threshold:
+                    counts[threshold] += 1
+        return counts
+
     async def _send_milestones(self) -> None:
-        if not self.player_stats and not self.player_map:
+        """Compact milestone summary — account totals + brawler threshold counts only."""
+        if not self.player_map:
             await self.send_message("No milestone progress available yet.")
             return
-        msg = "Milestone progress by player:\n"
+        msg = "**Milestones**\n"
         for name in self.player_map:
-            stats = self._ensure_player_stats(name)
-            msg += f"**{name}**:\n"
-            player_info = self.brawl_client.get_player_info(stats.get("tag") or self.player_map[name])
+            player_info = self.brawl_client.get_player_info(self.player_map[name])
             if player_info is None:
-                msg += "\tUnable to load player data.\n"
+                msg += f"**{name}**: unable to load\n"
                 continue
-            await self._check_total_trophy_milestones(name, player_info)
-            await self._check_peak_trophies(name, player_info)
-            await self._check_milestones(name, player_info)
             trophies = int(player_info.get("trophies") or 0)
             highest = int(player_info.get("highestTrophies") or trophies)
-            msg += f"\tAccount: {trophies:,} trophies (peak {highest:,})\n"
-            total_hits = stats.get("total_trophy_milestones") or []
-            if total_hits:
-                msg += f"\tTotal milestones hit: {', '.join(str(x) for x in total_hits[-5:])}\n"
-            for brawler in player_info.get("brawlers", []):
-                brawler_name = brawler.get("name")
-                trophy_count = int(brawler.get("trophies") or 0)
-                thresholds = self._milestones_for_trophies(trophy_count)
-                if thresholds:
-                    msg += f"\t{brawler_name}: {trophy_count} trophies - milestones {thresholds}\n"
-                else:
-                    msg += f"\t{brawler_name}: {trophy_count} trophies - no milestones yet\n"
+            next_total = self._next_total_trophy_milestone(trophies)
+            counts = self._brawler_milestone_counts(player_info)
+            # Only show thresholds where at least one brawler has hit them
+            brawler_bits = [
+                f"{threshold}+×{count}"
+                for threshold, count in counts.items()
+                if count > 0
+            ]
+            brawler_summary = ", ".join(brawler_bits) if brawler_bits else "none yet"
+            msg += (
+                f"**{name}**: {trophies:,} trophies (peak {highest:,}) "
+                f"→ next {next_total:,}\n"
+                f"\tBrawlers: {brawler_summary}\n"
+            )
         await self.send_message(msg)
-        self.save_state()
 
     async def _send_profile(self, player_name: Optional[str] = None) -> None:
         if not player_name:
@@ -916,7 +929,7 @@ class MessageController:
         owned_count = len(owned)
         total = len(catalog)
 
-        # Power / gear summary for owned
+        # Power summary for owned
         max_power = sum(1 for b in owned.values() if int(b.get("power") or 0) >= 11)
         msg = (
             f"**Collection — {player_name}**\n"
@@ -1025,16 +1038,39 @@ class MessageController:
         msg = (
             f"**{player_name}** — **{name}**\n"
             f"Power: **{power}**\n"
-            f"Trophies: {trophies:,} (peak {highest:,})"
+            f"Trophies: {trophies:,} (peak {highest:,})\n"
         )
         if rank is not None:
-            msg += f"\nRank: {rank}"
+            msg += f"Rank: {rank}\n"
+        if brawler.get("id") is not None:
+            msg += f"ID: {brawler.get('id')}\n"
+
+        msg += "\n**Gadgets**\n"
         if gadgets:
-            msg += f"\nGadgets: {', '.join(g.get('name') or '?' for g in gadgets)}"
+            for g in gadgets:
+                msg += f"\t• {g.get('name') or '?'}\n"
+        else:
+            msg += "\tnone\n"
+
+        msg += "**Star powers**\n"
         if star_powers:
-            msg += f"\nStar powers: {', '.join(sp.get('name') or '?' for sp in star_powers)}"
+            for sp in star_powers:
+                msg += f"\t• {sp.get('name') or '?'}\n"
+        else:
+            msg += "\tnone\n"
+
+        msg += "**Gears**\n"
         if gears:
-            msg += f"\nGears: {', '.join(g.get('name') or '?' for g in gears)}"
+            for g in gears:
+                gname = g.get("name") or "?"
+                level = g.get("level")
+                if level is not None:
+                    msg += f"\t• {gname} (level {level})\n"
+                else:
+                    msg += f"\t• {gname}\n"
+        else:
+            msg += "\tnone\n"
+
         await self.send_message(msg)
 
     async def _show_progress(self):
