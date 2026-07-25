@@ -27,7 +27,7 @@ class TestMessageController(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(self.controller.player_map, {})
         self.assertEqual(self.controller.player_stats, {})
         self.assertEqual(self.controller.target_channel, self.target_channel)
-        self.assertEqual(self.controller.version, "2.2.0")
+        self.assertEqual(self.controller.version, "2.3.0")
 
     async def test_send_message(self):
         msg = "Hello, world!"
@@ -407,6 +407,28 @@ class TestMessageController(unittest.IsolatedAsyncioTestCase):
 
 
 class TestProfileCard(unittest.TestCase):
+    def test_mascot_tier_for_trophies(self):
+        from profile_card import mascot_path_for_trophies, mascot_tier_for_trophies
+
+        self.assertEqual(mascot_tier_for_trophies(0), 0)
+        self.assertEqual(mascot_tier_for_trophies(74_999), 0)
+        self.assertEqual(mascot_tier_for_trophies(75_000), 75_000)
+        self.assertEqual(mascot_tier_for_trophies(79_999), 75_000)
+        self.assertEqual(mascot_tier_for_trophies(80_000), 80_000)
+        self.assertEqual(mascot_tier_for_trophies(149_999), 145_000)
+        self.assertEqual(mascot_tier_for_trophies(150_000), 150_000)
+        self.assertEqual(mascot_tier_for_trophies(200_000), 150_000)
+
+        dude = mascot_path_for_trophies(50_000)
+        girl = mascot_path_for_trophies(100_000)
+        peak = mascot_path_for_trophies(160_000)
+        self.assertIsNotNone(dude)
+        self.assertTrue(str(dude).endswith("dude.jpg"))
+        self.assertIsNotNone(girl)
+        self.assertTrue(str(girl).endswith("girl_100000.jpg"))
+        self.assertIsNotNone(peak)
+        self.assertTrue(str(peak).endswith("girl_150000.jpg"))
+
     def test_generate_profile_card(self):
         from profile_card import generate_profile_card
 
@@ -440,6 +462,34 @@ class TestProfileCard(unittest.TestCase):
             self.assertEqual(out, path)
             self.assertTrue(os.path.exists(path))
             self.assertGreater(os.path.getsize(path), 1000)
+        finally:
+            if os.path.exists(path):
+                os.remove(path)
+
+    def test_generate_profile_card_high_trophies_with_mascot(self):
+        from profile_card import generate_profile_card
+
+        path = "test_profile_card_high.png"
+        try:
+            out = generate_profile_card(
+                {
+                    "name": "HighPlayer",
+                    "tag": "#HIGH",
+                    "trophies": 102_500,
+                    "highestTrophies": 105_000,
+                    "expLevel": 300,
+                    "3vs3Victories": 5000,
+                    "soloVictories": 200,
+                    "duoVictories": 300,
+                    "club": {"name": "Elites"},
+                    "brawlers": [{"name": "SHELLY", "trophies": 1200, "power": 11}],
+                },
+                display_name="highroller",
+                output_path=path,
+            )
+            self.assertEqual(out, path)
+            self.assertTrue(os.path.exists(path))
+            self.assertGreater(os.path.getsize(path), 5000)
         finally:
             if os.path.exists(path):
                 os.remove(path)

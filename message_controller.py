@@ -38,7 +38,7 @@ class MessageController:
         self.start_time = None
         self.last_activity_time = None
         self.auto_end_timeout = datetime.timedelta(minutes=10)
-        self.version = "2.2.0"
+        self.version = "2.3.0"
         self._brawler_catalog_cache: Optional[list] = None
         self._ending_session = False
 

@@ -1,14 +1,46 @@
 """Generate player profile image cards from Brawl Stars API data."""
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any, Optional
 
 from matplotlib import pyplot as plt
+from matplotlib.image import imread
+from matplotlib.offsetbox import AnnotationBbox, OffsetImage
 from matplotlib.patches import FancyBboxPatch, Rectangle
+
+# Trophy-tier mascots: dude below 75k, anime girl from 75k, more lewd every 5k, peak 150k
+ASSETS_DIR = Path(__file__).resolve().parent / "assets" / "profile_mascots"
+GIRL_START = 75_000
+GIRL_STEP = 5_000
+GIRL_PEAK = 150_000
 
 
 def _safe(value: Any, default: Any = 0) -> Any:
     return default if value is None else value
+
+
+def mascot_tier_for_trophies(trophies: int) -> int:
+    """
+    Return the trophy tier key used for mascot selection.
+
+    Below GIRL_START → 0 (dude). At/above GIRL_START → floored to 5k steps,
+    capped at GIRL_PEAK.
+    """
+    if trophies < GIRL_START:
+        return 0
+    tier = (int(trophies) // GIRL_STEP) * GIRL_STEP
+    return min(GIRL_PEAK, max(GIRL_START, tier))
+
+
+def mascot_path_for_trophies(trophies: int) -> Optional[Path]:
+    """Resolve the mascot image path for a trophy count, or None if missing."""
+    tier = mascot_tier_for_trophies(trophies)
+    if tier == 0:
+        path = ASSETS_DIR / "dude.jpg"
+    else:
+        path = ASSETS_DIR / f"girl_{tier}.jpg"
+    return path if path.is_file() else None
 
 
 def generate_profile_card(
@@ -42,17 +74,18 @@ def generate_profile_card(
     )
     top_brawlers = brawlers_sorted[:5]
 
-    fig, ax = plt.subplots(figsize=(10, 6), dpi=140)
+    # Wider card so the mascot portrait fits on the right
+    fig, ax = plt.subplots(figsize=(12, 6), dpi=140)
     fig.patch.set_facecolor("#0f172a")
     ax.set_facecolor("#0f172a")
-    ax.set_xlim(0, 10)
+    ax.set_xlim(0, 12)
     ax.set_ylim(0, 6)
     ax.axis("off")
 
     # Outer card
     card = FancyBboxPatch(
         (0.25, 0.25),
-        9.5,
+        11.5,
         5.5,
         boxstyle="round,pad=0.05,rounding_size=0.25",
         linewidth=2,
@@ -62,7 +95,7 @@ def generate_profile_card(
     ax.add_patch(card)
 
     # Accent bar
-    ax.add_patch(Rectangle((0.25, 4.9), 9.5, 0.85, facecolor="#0284c7", edgecolor="none"))
+    ax.add_patch(Rectangle((0.25, 4.9), 11.5, 0.85, facecolor="#0284c7", edgecolor="none"))
 
     ax.text(
         0.55,
@@ -75,7 +108,7 @@ def generate_profile_card(
     )
     ax.text(0.55, 5.0, tag, color="#e0f2fe", fontsize=12, va="center")
     ax.text(
-        9.45,
+        8.3,
         5.35,
         f"LVL {exp_level}",
         color="white",
@@ -85,7 +118,7 @@ def generate_profile_card(
         va="center",
     )
 
-    # Main stats
+    # Main stats (left/center columns)
     stats_block = [
         ("Trophies", f"{trophies:,}"),
         ("Peak", f"{highest:,}"),
@@ -97,12 +130,12 @@ def generate_profile_card(
     for idx, (label, value) in enumerate(stats_block):
         col = idx % 3
         row = idx // 3
-        x = 0.7 + col * 3.1
+        x = 0.7 + col * 2.6
         y = 4.2 - row * 0.95
         ax.add_patch(
             FancyBboxPatch(
                 (x - 0.2, y - 0.35),
-                2.8,
+                2.4,
                 0.75,
                 boxstyle="round,pad=0.02,rounding_size=0.12",
                 linewidth=1,
@@ -138,15 +171,55 @@ def generate_profile_card(
             bname = str(brawler.get("name") or "?")
             btrophies = int(_safe(brawler.get("trophies"), 0))
             power = int(_safe(brawler.get("power"), 0))
-            bar_width = 4.5 * (btrophies / max_trophies)
-            ax.add_patch(Rectangle((3.6, y - 0.05), bar_width, 0.12, facecolor="#38bdf8", edgecolor="none"))
+            bar_width = 3.8 * (btrophies / max_trophies)
+            ax.add_patch(Rectangle((3.4, y - 0.05), bar_width, 0.12, facecolor="#38bdf8", edgecolor="none"))
             ax.text(0.55, y, f"{bname} (P{power})", color="#cbd5e1", fontsize=9, va="center")
-            ax.text(8.3, y, f"{btrophies}", color="#f8fafc", fontsize=9, va="center", ha="right")
+            ax.text(7.4, y, f"{btrophies}", color="#f8fafc", fontsize=9, va="center", ha="right")
     else:
         ax.text(0.55, 1.0, "No brawler data", color="#94a3b8", fontsize=10)
 
+    # Trophy-tier mascot portrait (right side)
+    mascot_path = mascot_path_for_trophies(trophies)
+    if mascot_path is not None:
+        try:
+            img = imread(str(mascot_path))
+            # Frame behind portrait
+            ax.add_patch(
+                FancyBboxPatch(
+                    (8.55, 0.45),
+                    2.95,
+                    4.25,
+                    boxstyle="round,pad=0.02,rounding_size=0.15",
+                    linewidth=1.5,
+                    edgecolor="#38bdf8",
+                    facecolor="#0f172a",
+                )
+            )
+            imagebox = OffsetImage(img, zoom=0.22)
+            ab = AnnotationBbox(
+                imagebox,
+                (10.0, 2.7),
+                frameon=False,
+                box_alignment=(0.5, 0.5),
+            )
+            ax.add_artist(ab)
+            tier = mascot_tier_for_trophies(trophies)
+            tier_label = "rookie form" if tier == 0 else f"{tier:,}+ form"
+            ax.text(
+                10.0,
+                0.6,
+                tier_label,
+                color="#94a3b8",
+                fontsize=8,
+                ha="center",
+                va="center",
+            )
+        except Exception:
+            # Missing/corrupt image should not break card generation
+            pass
+
     ax.text(
-        9.45,
+        11.45,
         0.4,
         "BrawlBot",
         color="#64748b",
