@@ -27,7 +27,7 @@ class MessageController:
         self.available_commands = [
             "!help", "!setname", "!status", "!debug", "start", "add", "remove", "end",
             "grind", "progress", "edge", "reset", "stats", "leaderboard", "milestones",
-            "profile", "catalog", "collection", "brawlers",
+            "profile", "catalog", "collection", "brawlers", "power",
         ]
         self.players_to_track: dict[str, dict] = {}
         self.player_map: dict[str, str] = {}
@@ -144,6 +144,7 @@ class MessageController:
             f"!{self.name} profile [player_name]": "show player profile + image card",
             f"!{self.name} catalog [brawler]": "browse the brawler catalog",
             f"!{self.name} collection [player_name]": "compare owned brawlers vs catalog",
+            f"!{self.name} power <player_name> <brawler>": "show a player's power level for a brawler",
             "!debug": "show full status of bot",
         }
         help_msg = "List of available commands: \n"
@@ -932,6 +933,110 @@ class MessageController:
             msg += "Missing: none — full catalog!"
         await self.send_message(msg)
 
+    def _find_owned_brawler(self, query: str, owned: list) -> Optional[dict]:
+        """Find a brawler in a player's owned list by name (exact, then unique partial)."""
+        needle = self._normalize_brawler_name(query)
+        if not needle:
+            return None
+        for brawler in owned:
+            if self._normalize_brawler_name(brawler.get("name") or "") == needle:
+                return brawler
+        matches = [
+            b for b in owned
+            if needle in self._normalize_brawler_name(b.get("name") or "")
+        ]
+        if len(matches) == 1:
+            return matches[0]
+        return None
+
+    async def _send_brawler_power(
+        self,
+        player_name: Optional[str] = None,
+        brawler_query: Optional[str] = None,
+    ) -> None:
+        """Show power level (and related stats) for a player's brawler."""
+        usage = (
+            f"Usage: `!{self.name} power <player_name> <brawler>`\n"
+            f"Example: `!{self.name} power alice shelly`"
+        )
+        # Single-arg form: treat as brawler when only one player is registered
+        if player_name and not brawler_query:
+            if len(self.player_map) == 1:
+                brawler_query = player_name
+                player_name = next(iter(self.player_map))
+            else:
+                names = ", ".join(self.player_map.keys()) or "(none)"
+                await self.send_message(f"{usage}\nRegistered: {names}")
+                return
+
+        if not player_name or not brawler_query:
+            names = ", ".join(self.player_map.keys()) or "(none)"
+            await self.send_message(f"{usage}\nRegistered: {names}")
+            return
+
+        if player_name not in self.player_map:
+            await self.send_message(f"Player {player_name} is not registered")
+            return
+
+        player_info = self.brawl_client.get_player_info(self.player_map[player_name])
+        if player_info is None:
+            await self.send_message(f"Unable to load data for {player_name}")
+            return
+
+        owned = player_info.get("brawlers") or []
+        brawler = self._find_owned_brawler(brawler_query, owned)
+        if brawler is None:
+            needle = self._normalize_brawler_name(brawler_query)
+            partial = [
+                b.get("name") for b in owned
+                if needle in self._normalize_brawler_name(b.get("name") or "")
+            ]
+            if partial:
+                await self.send_message(
+                    f"Multiple matches for '{brawler_query}': {', '.join(partial[:15])}"
+                )
+            else:
+                # Clarify not-owned vs not-found in catalog
+                catalog = self._get_catalog()
+                in_catalog = (
+                    catalog is not None
+                    and self._find_catalog_brawler(brawler_query, catalog) is not None
+                )
+                if in_catalog:
+                    await self.send_message(
+                        f"**{player_name}** does not own **{brawler_query}** "
+                        f"(or the name did not match uniquely)."
+                    )
+                else:
+                    await self.send_message(
+                        f"No brawler found matching '{brawler_query}' for {player_name}"
+                    )
+            return
+
+        name = brawler.get("name") or brawler_query
+        power = int(brawler.get("power") or 0)
+        trophies = int(brawler.get("trophies") or 0)
+        highest = int(brawler.get("highestTrophies") or trophies)
+        rank = brawler.get("rank")
+        gadgets = brawler.get("gadgets") or []
+        star_powers = brawler.get("starPowers") or []
+        gears = brawler.get("gears") or []
+
+        msg = (
+            f"**{player_name}** — **{name}**\n"
+            f"Power: **{power}**\n"
+            f"Trophies: {trophies:,} (peak {highest:,})"
+        )
+        if rank is not None:
+            msg += f"\nRank: {rank}"
+        if gadgets:
+            msg += f"\nGadgets: {', '.join(g.get('name') or '?' for g in gadgets)}"
+        if star_powers:
+            msg += f"\nStar powers: {', '.join(sp.get('name') or '?' for sp in star_powers)}"
+        if gears:
+            msg += f"\nGears: {', '.join(g.get('name') or '?' for g in gears)}"
+        await self.send_message(msg)
+
     async def _show_progress(self):
         """Show intermediate progress"""
         msg = "Progress\n"
@@ -1125,6 +1230,17 @@ class MessageController:
             elif action.startswith("collection"):
                 parts = action.split(maxsplit=1)
                 await self._send_collection(parts[1].strip() if len(parts) > 1 else None)
+                return
+
+            elif action.startswith("power"):
+                parts = action.split()
+                if len(parts) < 2:
+                    await self._send_brawler_power()
+                elif len(parts) == 2:
+                    # power <brawler> when only one registered player
+                    await self._send_brawler_power(parts[1], None)
+                else:
+                    await self._send_brawler_power(parts[1], " ".join(parts[2:]))
                 return
 
             elif action.startswith("add "):

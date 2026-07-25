@@ -21,6 +21,7 @@ class TestMessageController(unittest.IsolatedAsyncioTestCase):
         self.assertIn("profile", self.controller.available_commands)
         self.assertIn("catalog", self.controller.available_commands)
         self.assertIn("collection", self.controller.available_commands)
+        self.assertIn("power", self.controller.available_commands)
         self.assertIn("remove", self.controller.available_commands)
         self.assertEqual(self.controller.players_to_track, {})
         self.assertEqual(self.controller.player_map, {})
@@ -39,6 +40,7 @@ class TestMessageController(unittest.IsolatedAsyncioTestCase):
         help_text = self.target_channel.send.call_args[0][0]
         self.assertIn("profile", help_text)
         self.assertIn("catalog", help_text)
+        self.assertIn("power", help_text)
 
     async def test_send_status_message(self):
         self.controller.players_to_track = {"player1": {}}
@@ -231,6 +233,55 @@ class TestMessageController(unittest.IsolatedAsyncioTestCase):
         text = self.target_channel.send.call_args[0][0]
         self.assertIn("2/3", text)
         self.assertIn("COLT", text)
+
+    async def test_brawler_power(self):
+        self.controller.player_map = {"alice": "#AAA"}
+        self.controller.brawl_client.get_player_info.return_value = {
+            "brawlers": [
+                {
+                    "name": "SHELLY",
+                    "power": 11,
+                    "trophies": 600,
+                    "highestTrophies": 650,
+                    "rank": 25,
+                    "gadgets": [{"name": "Fast Forward"}],
+                    "starPowers": [{"name": "Shell Shock"}],
+                    "gears": [{"name": "Speed"}],
+                },
+                {"name": "NITA", "power": 9, "trophies": 400},
+            ]
+        }
+        await self.controller._send_brawler_power("alice", "shelly")
+        text = self.target_channel.send.call_args[0][0]
+        self.assertIn("alice", text)
+        self.assertIn("SHELLY", text)
+        self.assertIn("**11**", text)
+        self.assertIn("600", text)
+        self.assertIn("Shell Shock", text)
+        self.assertIn("Fast Forward", text)
+
+    async def test_brawler_power_single_player_shorthand(self):
+        self.controller.player_map = {"alice": "#AAA"}
+        self.controller.brawl_client.get_player_info.return_value = {
+            "brawlers": [{"name": "NITA", "power": 9, "trophies": 400, "highestTrophies": 400}]
+        }
+        await self.controller._send_brawler_power("nita", None)
+        text = self.target_channel.send.call_args[0][0]
+        self.assertIn("NITA", text)
+        self.assertIn("**9**", text)
+
+    async def test_brawler_power_not_owned(self):
+        self.controller.player_map = {"alice": "#AAA"}
+        self.controller.brawl_client.get_player_info.return_value = {
+            "brawlers": [{"name": "SHELLY", "power": 11, "trophies": 600}]
+        }
+        self.controller.brawl_client.get_brawlers.return_value = [
+            {"id": 1, "name": "SHELLY"},
+            {"id": 2, "name": "COLT"},
+        ]
+        await self.controller._send_brawler_power("alice", "colt")
+        text = self.target_channel.send.call_args[0][0]
+        self.assertIn("does not own", text)
 
     async def test_profile_sends_card(self):
         self.controller.player_map = {"alice": "#AAA"}
