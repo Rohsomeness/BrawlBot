@@ -286,19 +286,12 @@ class MessageController:
         return announced
 
     async def _check_peak_trophies(self, name: str, player_info: dict) -> bool:
-        """Announce new all-time trophy peaks."""
+        """Quietly track all-time trophy peak (no chat announcement)."""
         stats = self._ensure_player_stats(name, player_info)
         highest = int(player_info.get("highestTrophies") or player_info.get("trophies") or 0)
         previous_peak = int(stats.get("last_highest_trophies") or 0)
-        announced = False
-        if previous_peak and highest > previous_peak:
-            await self.send_message(
-                f"🚀 **{name}** set a new peak: **{highest:,}** trophies "
-                f"(was {previous_peak:,})!"
-            )
-            announced = True
         stats["last_highest_trophies"] = max(previous_peak, highest)
-        return announced
+        return False
 
     async def _check_milestones(self, name, player_info) -> bool:
         """Announce per-brawler trophy milestones. Returns True if anything announced."""
@@ -956,7 +949,6 @@ class MessageController:
             msg += f"\tTotal games (modes): {self._total_mode_games(stats)}\n"
             msg += f"\tModes: {self._format_mode_counts(stats.get('total_modes'))}\n"
             msg += f"\tLast trophies: {stats.get('last_trophies', 0)}\n"
-            msg += f"\tPeak trophies: {stats.get('last_highest_trophies', 0)}\n"
             await self.send_message(msg)
             return
 

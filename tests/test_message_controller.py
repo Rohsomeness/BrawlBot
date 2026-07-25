@@ -107,7 +107,8 @@ class TestMessageController(unittest.IsolatedAsyncioTestCase):
         self.assertIn("4,000", sent)
         self.assertIn(4000, self.controller.player_stats["alice"]["total_trophy_milestones"])
 
-    async def test_peak_trophy_announcement(self):
+    async def test_peak_trophy_tracks_silently(self):
+        """New peaks update internal state but do not post to chat."""
         self.controller.player_map = {"alice": "#AAA"}
         self.controller.player_stats = {
             "alice": {
@@ -119,9 +120,9 @@ class TestMessageController(unittest.IsolatedAsyncioTestCase):
             }
         }
         player_info = {"trophies": 5050, "highestTrophies": 5050, "brawlers": []}
-        await self.controller._check_peak_trophies("alice", player_info)
-        sent = self.target_channel.send.call_args[0][0]
-        self.assertIn("new peak", sent)
+        announced = await self.controller._check_peak_trophies("alice", player_info)
+        self.assertFalse(announced)
+        self.target_channel.send.assert_not_called()
         self.assertEqual(self.controller.player_stats["alice"]["last_highest_trophies"], 5050)
 
     async def test_brawler_milestone_announcement(self):
