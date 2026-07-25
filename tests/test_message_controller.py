@@ -27,7 +27,7 @@ class TestMessageController(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(self.controller.player_map, {})
         self.assertEqual(self.controller.player_stats, {})
         self.assertEqual(self.controller.target_channel, self.target_channel)
-        self.assertEqual(self.controller.version, "2.3.0")
+        self.assertEqual(self.controller.version, "2.4.0")
 
     async def test_send_message(self):
         msg = "Hello, world!"
@@ -365,6 +365,97 @@ class TestMessageController(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(self.controller._battle_result({"rank": 1}), "victory")
         self.assertEqual(self.controller._battle_result({"rank": 5}), "defeat")
         self.assertIsNone(self.controller._battle_result({}))
+
+    def test_pretty_mode_and_battle_mode(self):
+        self.assertEqual(self.controller._pretty_mode("brawlBall"), "Brawl Ball")
+        self.assertEqual(self.controller._pretty_mode("gemGrab"), "Gem Grab")
+        self.assertEqual(
+            self.controller._battle_mode({
+                "event": {"mode": "hotZone"},
+                "battle": {"mode": "brawlBall"},
+            }),
+            "brawlBall",
+        )
+        self.assertEqual(
+            self.controller._battle_mode({"event": {"mode": "knockout"}, "battle": {}}),
+            "knockout",
+        )
+
+    async def test_star_players_pie_skips_when_empty(self):
+        with patch.object(self.controller, "send_file", new_callable=AsyncMock) as mock_file:
+            await self.controller._send_pie_chart(
+                {"alice": 0, "bob": 0}, "Stars", "stars.png"
+            )
+        mock_file.assert_not_called()
+
+    async def test_star_players_pie_sends_when_present(self):
+        with patch("message_controller.plt.savefig"), patch("message_controller.plt.close"):
+            with patch.object(self.controller, "send_file", new_callable=AsyncMock) as mock_file:
+                await self.controller._send_pie_chart(
+                    {"alice": 3, "bob": 1, "carol": 0},
+                    "Session Star Players",
+                    "session_star_players.png",
+                )
+        mock_file.assert_called_once_with("session_star_players.png")
+
+    async def test_lifetime_charts_sent_from_leaderboard(self):
+        self.controller.player_stats = {
+            "alice": {
+                "total_trophies_climbed": 100,
+                "total_star_players": 5,
+                "total_wins": 10,
+                "total_defeats": 4,
+                "total_modes": {"brawlBall": 8, "gemGrab": 3},
+            },
+            "bob": {
+                "total_trophies_climbed": 50,
+                "total_star_players": 2,
+                "total_wins": 3,
+                "total_defeats": 6,
+                "total_modes": {"brawlBall": 4},
+            },
+        }
+        with patch("message_controller.plt.savefig"), patch("message_controller.plt.close"), \
+             patch("message_controller.plt.figure"), patch("message_controller.plt.bar"), \
+             patch("message_controller.plt.barh"), patch("message_controller.plt.pie", return_value=([], [], [])), \
+             patch("message_controller.plt.xticks"), patch("message_controller.plt.yticks"), \
+             patch("message_controller.plt.xlabel"), patch("message_controller.plt.ylabel"), \
+             patch("message_controller.plt.title"), patch("message_controller.plt.legend"), \
+             patch("message_controller.plt.axis"), patch("message_controller.plt.subplots_adjust"), \
+             patch("message_controller.plt.tight_layout"), patch("message_controller.plt.text"):
+            with patch.object(self.controller, "send_file", new_callable=AsyncMock) as mock_file:
+                await self.controller._send_lifetime_charts()
+        filenames = [c.args[0] for c in mock_file.call_args_list]
+        self.assertIn("lifetime_trophies_climbed.png", filenames)
+        self.assertIn("lifetime_outcomes.png", filenames)
+        self.assertIn("lifetime_modes.png", filenames)
+        self.assertIn("lifetime_star_players.png", filenames)
+        self.assertIn("lifetime_games.png", filenames)
+
+    def test_record_mode_play_session_and_lifetime(self):
+        self.controller.player_map = {"alice": "#AAA"}
+        self.controller.player_battle_map = {
+            "alice": {
+                "battle_start_times": set(),
+                "star_players": 0,
+                "game_durations_s": 0,
+                "victories": 0,
+                "defeats": 0,
+                "consecutive_victories": 0,
+                "consecutive_losses": 0,
+                "modes": {},
+            }
+        }
+        self.controller._record_mode_play("alice", "brawlBall")
+        self.controller._record_mode_play("alice", "brawlBall")
+        self.controller._record_mode_play("alice", "gemGrab")
+        self.assertEqual(self.controller.player_battle_map["alice"]["modes"]["brawlBall"], 2)
+        self.assertEqual(self.controller.player_battle_map["alice"]["modes"]["gemGrab"], 1)
+        self.assertEqual(self.controller.player_stats["alice"]["total_modes"]["brawlBall"], 2)
+        self.assertEqual(self.controller.player_stats["alice"]["total_modes"]["gemGrab"], 1)
+        self.assertIn("Brawl Ball×2", self.controller._format_mode_counts(
+            self.controller.player_stats["alice"]["total_modes"]
+        ))
 
     @patch("builtins.open", new_callable=mock_open)
     @patch("pickle.dump")

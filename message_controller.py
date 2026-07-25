@@ -38,7 +38,7 @@ class MessageController:
         self.start_time = None
         self.last_activity_time = None
         self.auto_end_timeout = datetime.timedelta(minutes=10)
-        self.version = "2.3.0"
+        self.version = "2.4.0"
         self._brawler_catalog_cache: Optional[list] = None
         self._ending_session = False
 
@@ -52,6 +52,7 @@ class MessageController:
             "total_star_players": 0,
             "total_wins": 0,
             "total_defeats": 0,
+            "total_modes": {},  # mode_id -> games played (lifetime)
             "brawler_milestones": self._seed_brawler_milestones(player_info),
             "total_trophy_milestones": self._total_milestones_for_trophies(trophies),
             "last_trophies": trophies,
@@ -78,6 +79,7 @@ class MessageController:
             stats.setdefault("total_star_players", 0)
             stats.setdefault("total_wins", 0)
             stats.setdefault("total_defeats", 0)
+            stats.setdefault("total_modes", {})
             stats.setdefault("brawler_milestones", {})
             stats.setdefault("total_trophy_milestones", [])
             stats.setdefault("last_trophies", (player_info or {}).get("trophies", 0))
@@ -225,6 +227,7 @@ class MessageController:
                 "defeats": 0,
                 "consecutive_victories": 0,
                 "consecutive_losses": 0,
+                "modes": {},  # mode_id -> games this session
             }
             self._ensure_player_stats(name, player_info)
             start_tracking_msg += f"\tName: {name}, Start Trophies: {player_info['trophies']}\n"
@@ -345,25 +348,278 @@ class MessageController:
             self.save_state()
         return player_infos
 
-    async def _send_session_outcome_graph(self) -> None:
-        plt.figure()
-        plt.title("Session Outcomes")
+    @staticmethod
+    def _pretty_mode(mode: str) -> str:
+        """Turn API mode ids like brawlBall into display labels."""
+        if not mode:
+            return "Unknown"
+        spaced = ""
+        for i, ch in enumerate(mode):
+            if i > 0 and ch.isupper() and mode[i - 1].islower():
+                spaced += " "
+            spaced += ch
+        return spaced.strip().title()
+
+    @staticmethod
+    def _battle_mode(game_info: dict) -> str:
+        battle = game_info.get("battle") or {}
+        event = game_info.get("event") or {}
+        return battle.get("mode") or event.get("mode") or "unknown"
+
+    @staticmethod
+    def _format_mode_counts(modes: Optional[dict], limit: int = 6) -> str:
+        if not modes:
+            return "none"
+        ordered = sorted(modes.items(), key=lambda kv: (-int(kv[1]), str(kv[0])))
+        parts = [
+            f"{MessageController._pretty_mode(mode)}×{count}"
+            for mode, count in ordered[:limit]
+        ]
+        if len(ordered) > limit:
+            parts.append(f"+{len(ordered) - limit} more")
+        return ", ".join(parts)
+
+    def _record_mode_play(self, name: str, mode: str) -> None:
+        """Increment session + lifetime counters for a game mode."""
+        mode_key = mode or "unknown"
+        battle_map = self.player_battle_map.get(name)
+        if battle_map is not None:
+            modes = battle_map.setdefault("modes", {})
+            modes[mode_key] = int(modes.get(mode_key, 0)) + 1
+        stats = self._ensure_player_stats(name)
+        total_modes = stats.setdefault("total_modes", {})
+        total_modes[mode_key] = int(total_modes.get(mode_key, 0)) + 1
+
+    CHART_PALETTE = [
+        "#38bdf8", "#a78bfa", "#f472b6", "#fb923c", "#34d399",
+        "#facc15", "#60a5fa", "#c084fc", "#4ade80", "#f87171",
+    ]
+
+    async def _send_stacked_win_loss_chart(
+        self,
+        labels: list,
+        wins: list,
+        defeats: list,
+        title: str,
+        filename: str,
+    ) -> None:
+        """Stacked bar: wins + defeats per label."""
+        if not labels:
+            return
+        if not any(int(w) or int(d) for w, d in zip(wins, defeats)):
+            return
+        x = list(range(len(labels)))
+        plt.figure(figsize=(max(6, len(labels) * 1.1), 5))
+        plt.title(title)
         plt.xlabel("Player")
         plt.ylabel("Games")
+        plt.bar(x, wins, label="Wins", color="#4CAF50")
+        plt.bar(x, defeats, bottom=wins, label="Defeats", color="#F44336")
+        plt.xticks(x, labels, rotation=45, ha="right")
+        plt.legend()
+        plt.subplots_adjust(bottom=0.2)
+        plt.savefig(filename, bbox_inches="tight")
+        plt.close()
+        await self.send_file(filename)
+
+    async def _send_stacked_modes_chart(
+        self,
+        labels: list,
+        modes_by_player: dict,
+        title: str,
+        filename: str,
+    ) -> None:
+        """Stacked bar: games per mode per player. modes_by_player: name -> {mode: count}."""
+        if not labels:
+            return
+        all_modes = set()
+        for name in labels:
+            all_modes.update((modes_by_player.get(name) or {}).keys())
+        if not all_modes:
+            return
+
+        mode_totals = {
+            mode: sum(int((modes_by_player.get(n) or {}).get(mode, 0)) for n in labels)
+            for mode in all_modes
+        }
+        modes_ordered = sorted(all_modes, key=lambda m: (-mode_totals[m], m))
+        x = list(range(len(labels)))
+        bottoms = [0] * len(labels)
+
+        plt.figure(figsize=(max(6, len(labels) * 1.2), 5))
+        plt.title(title)
+        plt.xlabel("Player")
+        plt.ylabel("Games")
+        for i, mode in enumerate(modes_ordered):
+            vals = [int((modes_by_player.get(n) or {}).get(mode, 0)) for n in labels]
+            plt.bar(
+                x,
+                vals,
+                bottom=bottoms,
+                label=self._pretty_mode(mode),
+                color=self.CHART_PALETTE[i % len(self.CHART_PALETTE)],
+            )
+            bottoms = [b + v for b, v in zip(bottoms, vals)]
+        plt.xticks(x, labels, rotation=45, ha="right")
+        plt.legend(fontsize=8, loc="upper left", bbox_to_anchor=(1.02, 1))
+        plt.subplots_adjust(bottom=0.2, right=0.75)
+        plt.savefig(filename, bbox_inches="tight")
+        plt.close()
+        await self.send_file(filename)
+
+    async def _send_pie_chart(
+        self,
+        values_by_label: dict,
+        title: str,
+        filename: str,
+    ) -> None:
+        """Pie chart for positive values only."""
+        items = [(str(k), int(v)) for k, v in values_by_label.items() if int(v or 0) > 0]
+        if not items:
+            return
+        items.sort(key=lambda kv: (-kv[1], kv[0]))
+        labels = [k for k, _ in items]
+        sizes = [v for _, v in items]
+        total = sum(sizes)
+        colors = [self.CHART_PALETTE[i % len(self.CHART_PALETTE)] for i in range(len(labels))]
+
+        plt.figure(figsize=(7, 5))
+        plt.title(f"{title} ({total} total)")
+        _wedges, texts, autotexts = plt.pie(
+            sizes,
+            labels=labels,
+            colors=colors,
+            autopct=lambda pct: f"{pct:.0f}%\n({int(round(pct * total / 100))})",
+            startangle=90,
+            pctdistance=0.65,
+        )
+        for t in texts:
+            t.set_fontsize(10)
+        for t in autotexts:
+            t.set_fontsize(8)
+            t.set_color("#0f172a")
+        plt.axis("equal")
+        plt.savefig(filename, bbox_inches="tight")
+        plt.close()
+        await self.send_file(filename)
+
+    async def _send_horizontal_bar_chart(
+        self,
+        values_by_label: dict,
+        title: str,
+        filename: str,
+        xlabel: str = "Value",
+        color: str = "#38bdf8",
+    ) -> None:
+        """Horizontal bar chart sorted high → low."""
+        items = [(str(k), int(v)) for k, v in values_by_label.items() if int(v or 0) != 0]
+        if not items:
+            return
+        items.sort(key=lambda kv: (kv[1], kv[0]))  # ascending so top bar is largest
+        labels = [k for k, _ in items]
+        values = [v for _, v in items]
+        y = list(range(len(labels)))
+
+        plt.figure(figsize=(8, max(3.5, 0.45 * len(labels) + 1.5)))
+        plt.title(title)
+        plt.barh(y, values, color=color)
+        plt.yticks(y, labels)
+        plt.xlabel(xlabel)
+        for yi, val in zip(y, values):
+            plt.text(val, yi, f" {val:,}", va="center", fontsize=9, color="#1e293b")
+        plt.tight_layout()
+        plt.savefig(filename, bbox_inches="tight")
+        plt.close()
+        await self.send_file(filename)
+
+    async def _send_session_outcome_graph(self) -> None:
         labels = list(self.player_battle_map.keys())
         wins = [self.player_battle_map[name]["victories"] for name in labels]
         defeats = [self.player_battle_map[name]["defeats"] for name in labels]
-        x = range(len(labels))
-        bar_width = 0.35
-        plt.bar([xi - bar_width / 2 for xi in x], wins, width=bar_width, label="Wins", color="#4CAF50")
-        plt.bar([xi + bar_width / 2 for xi in x], defeats, width=bar_width, label="Defeats", color="#F44336")
-        plt.xticks(list(x), labels, rotation=45, ha="right")
-        plt.legend()
-        plt.subplots_adjust(bottom=0.2)
-        filename = "session_outcomes.png"
-        plt.savefig(filename)
-        plt.close()
-        await self.send_file(filename)
+        await self._send_stacked_win_loss_chart(
+            labels, wins, defeats, "Session Outcomes (stacked)", "session_outcomes.png"
+        )
+
+    async def _send_session_modes_graph(self) -> None:
+        labels = list(self.player_battle_map.keys())
+        modes_by_player = {
+            name: (self.player_battle_map[name].get("modes") or {}) for name in labels
+        }
+        await self._send_stacked_modes_chart(
+            labels, modes_by_player, "Session Game Modes (stacked)", "session_modes.png"
+        )
+
+    async def _send_session_star_players_pie(self) -> None:
+        values = {
+            name: int(bm.get("star_players") or 0)
+            for name, bm in self.player_battle_map.items()
+        }
+        await self._send_pie_chart(values, "Session Star Players", "session_star_players.png")
+
+    async def _send_session_charts(self) -> None:
+        """All charts for the active tracking session."""
+        await self._send_session_outcome_graph()
+        await self._send_session_modes_graph()
+        await self._send_session_star_players_pie()
+
+    async def _send_lifetime_charts(self) -> None:
+        """Charts from persistent player_stats (leaderboard / lifetime)."""
+        if not self.player_stats:
+            return
+        # Stable order: trophies climbed desc
+        ordered = sorted(
+            self.player_stats.items(),
+            key=lambda item: (
+                item[1].get("total_trophies_climbed", 0),
+                item[1].get("total_star_players", 0),
+                item[1].get("total_wins", 0),
+            ),
+            reverse=True,
+        )
+        labels = [name for name, _ in ordered]
+        wins = [int(stats.get("total_wins") or 0) for _, stats in ordered]
+        defeats = [int(stats.get("total_defeats") or 0) for _, stats in ordered]
+        modes_by_player = {
+            name: (stats.get("total_modes") or {}) for name, stats in ordered
+        }
+        stars = {
+            name: int(stats.get("total_star_players") or 0) for name, stats in ordered
+        }
+        trophies_climbed = {
+            name: int(stats.get("total_trophies_climbed") or 0) for name, stats in ordered
+        }
+        games = {name: self._total_mode_games(stats) for name, stats in ordered}
+
+        await self._send_horizontal_bar_chart(
+            trophies_climbed,
+            "Lifetime Trophies Climbed",
+            "lifetime_trophies_climbed.png",
+            xlabel="Trophies",
+            color="#38bdf8",
+        )
+        await self._send_stacked_win_loss_chart(
+            labels,
+            wins,
+            defeats,
+            "Lifetime Outcomes (stacked)",
+            "lifetime_outcomes.png",
+        )
+        await self._send_stacked_modes_chart(
+            labels,
+            modes_by_player,
+            "Lifetime Game Modes (stacked)",
+            "lifetime_modes.png",
+        )
+        await self._send_pie_chart(
+            stars,
+            "Lifetime Star Players",
+            "lifetime_star_players.png",
+        )
+        await self._send_pie_chart(
+            games,
+            "Lifetime Games Played",
+            "lifetime_games.png",
+        )
 
     async def berate_player(self, player_name, consecutive_victories, consecutive_losses):
         if consecutive_victories >= 5:
@@ -521,6 +777,7 @@ class MessageController:
                 any_activity = True
                 battle_map["battle_start_times"].add(game_info["battleTime"])
                 battle = game_info.get("battle") or {}
+                self._record_mode_play(name, self._battle_mode(game_info))
                 if battle.get("starPlayer", {}).get("tag") == self.player_map[name]:
                     battle_map["star_players"] += 1
                     self._ensure_player_stats(name)
@@ -680,6 +937,11 @@ class MessageController:
         deltas.sort(key=lambda x: abs(x[1]), reverse=True)
         return deltas
 
+    @staticmethod
+    def _total_mode_games(stats: dict) -> int:
+        modes = stats.get("total_modes") or {}
+        return sum(int(v) for v in modes.values())
+
     async def _send_stats_message(self, player_name: str = None) -> None:
         if player_name:
             stats = self.player_stats.get(player_name)
@@ -691,6 +953,8 @@ class MessageController:
             msg += f"\tTotal star players: {stats.get('total_star_players', 0)}\n"
             msg += f"\tTotal wins: {stats.get('total_wins', 0)}\n"
             msg += f"\tTotal defeats: {stats.get('total_defeats', 0)}\n"
+            msg += f"\tTotal games (modes): {self._total_mode_games(stats)}\n"
+            msg += f"\tModes: {self._format_mode_counts(stats.get('total_modes'))}\n"
             msg += f"\tLast trophies: {stats.get('last_trophies', 0)}\n"
             msg += f"\tPeak trophies: {stats.get('last_highest_trophies', 0)}\n"
             await self.send_message(msg)
@@ -704,7 +968,8 @@ class MessageController:
         for name, stats in self.player_stats.items():
             msg += f"**{name}**: trophies climbed={stats.get('total_trophies_climbed', 0)}, "
             msg += f"star players={stats.get('total_star_players', 0)}, "
-            msg += f"wins={stats.get('total_wins', 0)}, defeats={stats.get('total_defeats', 0)}\n"
+            msg += f"wins={stats.get('total_wins', 0)}, defeats={stats.get('total_defeats', 0)}, "
+            msg += f"modes={self._format_mode_counts(stats.get('total_modes'), limit=4)}\n"
         await self.send_message(msg)
 
     async def _send_leaderboard(self) -> None:
@@ -717,6 +982,7 @@ class MessageController:
                 item[1].get("total_trophies_climbed", 0),
                 item[1].get("total_star_players", 0),
                 item[1].get("total_wins", 0),
+                self._total_mode_games(item[1]),
             ),
             reverse=True,
         )
@@ -725,9 +991,12 @@ class MessageController:
             msg += (
                 f"{idx}. {name}: trophies climbed={stats.get('total_trophies_climbed', 0)}, "
                 f"star players={stats.get('total_star_players', 0)}, "
-                f"wins={stats.get('total_wins', 0)}\n"
+                f"wins={stats.get('total_wins', 0)}, "
+                f"games={self._total_mode_games(stats)}\n"
+                f"\tmodes: {self._format_mode_counts(stats.get('total_modes'), limit=5)}\n"
             )
         await self.send_message(msg)
+        await self._send_lifetime_charts()
 
     def _next_total_trophy_milestone(self, trophies: int) -> Optional[int]:
         if trophies < self.TOTAL_TROPHY_MIN:
@@ -1087,6 +1356,7 @@ class MessageController:
             msg += f"\tDefeats: {battle_map['defeats']}\n"
             msg += f"\tStar Players: {battle_map['star_players']}\n"
             msg += f"\tGame Time: {battle_map['game_durations_s']}\n"
+            msg += f"\tModes: {self._format_mode_counts(battle_map.get('modes'))}\n"
 
         msg += "===== Trophy Gains =====\n"
         for player, start_player_info in self.players_to_track.items():
@@ -1107,7 +1377,7 @@ class MessageController:
                 msg += f"\t{brawler_name}: {delta:+d}\n"
         await self.send_message(msg)
         await self._send_trophy_delta_graph()
-        await self._send_session_outcome_graph()
+        await self._send_session_charts()
 
     async def _end_tracking(self):
         """End tracking of players"""
@@ -1131,6 +1401,7 @@ class MessageController:
                 msg += f"\tDefeats: {battle_map['defeats']}\n"
                 msg += f"\tStar Players: {battle_map['star_players']}\n"
                 msg += f"\tGame Time: {battle_map['game_durations_s']}\n"
+                msg += f"\tModes: {self._format_mode_counts(battle_map.get('modes'))}\n"
                 if battle_map["star_players"] > most_star_players[1]:
                     most_star_players = (player, battle_map["star_players"])
 
@@ -1153,7 +1424,7 @@ class MessageController:
                     msg += f"\t{brawler_name}: {delta:+d}\n"
             await self.send_message(msg)
             await self._send_trophy_delta_graph()
-            await self._send_session_outcome_graph()
+            await self._send_session_charts()
             await self._send_progress_graph()
             await self.send_message(
                 f"Congrats to {most_star_players[0]} for carrying the session "
@@ -1325,6 +1596,7 @@ class MessageController:
                         int(stats.get("last_highest_trophies") or last_trophies),
                     )
                     stats.setdefault("brawler_milestones", {})
+                    stats.setdefault("total_modes", {})
             print(f"State loaded from {filename}")
         else:
             print(f"No saved state found at {filename}")
