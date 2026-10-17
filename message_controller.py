@@ -1430,12 +1430,16 @@ class MessageController:
                     await self._check_total_trophy_milestones(player, final_info)
                     await self._check_peak_trophies(player, final_info)
                     await self._check_milestones(player, final_info)
+        finally:
+            # Always clear the session, even if reporting (API calls, Discord sends,
+            # chart rendering) raised. Otherwise the session stays half-ended and the
+            # 2-minute poller keeps re-triggering auto-end, re-posting "Ended Tracking".
             self.players_to_track = {}
             self.start_time = None
+            self.last_activity_time = None
             self.player_battle_map = {}
-            self.save_state()
-        finally:
             self._ending_session = False
+            self.save_state()
 
     def _validate_message(self, msg: str) -> bool:
         """Some basic validation on messages before analyzing"""

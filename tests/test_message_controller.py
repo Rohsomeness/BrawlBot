@@ -86,6 +86,23 @@ class TestMessageController(unittest.IsolatedAsyncioTestCase):
         self.assertIn("player1", self.controller.players_to_track)
         self.target_channel.send.assert_called_once()
 
+    async def test_end_tracking_clears_session_when_reporting_fails(self):
+        import datetime
+        self.controller.player_map = {"p": "#TAG"}
+        self.controller.players_to_track = {"p": {"trophies": 100}}
+        self.controller.player_battle_map = {"p": {}}
+        self.controller.start_time = datetime.datetime.now(tz=datetime.timezone.utc)
+        self.controller.last_activity_time = self.controller.start_time
+        self.controller._refresh_session_battles = AsyncMock(side_effect=RuntimeError("boom"))
+        with patch.object(self.controller, "save_state"):
+            with self.assertRaises(RuntimeError):
+                await self.controller._end_tracking()
+        self.assertEqual(self.controller.players_to_track, {})
+        self.assertEqual(self.controller.player_battle_map, {})
+        self.assertIsNone(self.controller.start_time)
+        self.assertIsNone(self.controller.last_activity_time)
+        self.assertFalse(self.controller._ending_session)
+
     async def test_total_trophy_milestone_announcement(self):
         self.controller.player_map = {"alice": "#AAA"}
         self.controller.player_stats = {
